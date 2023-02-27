@@ -19,14 +19,21 @@
 ### Proposed solution
 
 ![img](images/deliverable-1-proposed-solution.png)
+**NOTE**: The yellow circles depict flink operators.
 
 - What is the basic approach, method, idea or tool that’s being suggested to solve the problem? 
 
   Our approach will be to implement a streaming system using Flink to consume a label graph data flow and interact with PyTorch to retrain the GNN. In order to handle the “catastrophic forgetting” problem we have to design an algorithm that samples training data from both the new data and the graph stored in disk.
 
+  We will use Java Flink to handle the stream and perform stream sampling and batching. This data is sent downstream to the graph training Java Flink operator. We plan to limit the number of workers in this operator to one, such that it produces only one set of trained weights. We can look into more complicated distributed training setup as a stretch goal for the project. The  Graph training operator invokes an RPC Call to a GRPC train server written in Python. This train server recieves the batched and preprocessed data as RPC parameters. We use Pytorch / Tensorflow for this training. On conclusion, the train server returns the set of trained weights to the parent operator, which then publishes the weights to subscribed scalable inference operator downstream.
+  
+  As provided in the project description, we can use the code in online GNN learning [repo](https://github.com/MassimoPerini/online-gnn-learning). We do not need to alter the model code.
+
 - Try to be as specific as possible and mention concrete tools / programming languages / frameworks.
 
-  For the training pipeline we plan to use Python and Pytorch for the implementation. We plan to do the serving of the inference models with production grade tools like Pytorch Serving. For the streaming we are going to use Flink and for storing the graph we may use a graph database.
+  For the training pipeline we plan to use Python and Pytorch for the implementation. We plan to do the serving of the inference models with production grade tools like Pytorch Serving. For the streaming we are going to use Flink and for storing the graph we may use a graph database. We also plan to use GRPC for intercommunication between Python train server and flink training node. Finally, we plan to use Kafka for distributing the trained weights among the consumers responsible for hosting the inference servers.
+
+  For starters, we plan to build the setup on one local machine. Hence we can quite easily use local IPC techniques like tempfiles and FIFO pipes to mimick GRPC.
 
 ### Expectations
 
@@ -45,6 +52,8 @@
 - What kind of measurements, simulations, and experiments are you planning to run in order to verify your hypotheses? 
 
   The metrics of interest are latency, accuracy and memory consumption.
+
+  (Throughput will not be a metric of interest for our project at least as a primary goal, but a stretch goal can be to maximize    throughput if that’s needed.)
 
   We are going to experiment with different sample sizes, sampling algorithms, window sizes (i.e. after how many graph changes do we perform a training step) and other possible hyperparameters of our streaming system which are to be determined.
 
@@ -70,11 +79,16 @@
     - Accuracy lower than baseline 1 and higher than baseline 2
     - Memory size and training cost lower than baseline 2 and higher than baseline 1
   
+  Latency (end-to-end):
+  we are going to measure the time it takes to update/retrain our model from the time we ingest new data.
+  The algorithms presented in the paper (RBR and PBR) achieve seconds of latency  (~1-10 secs). Our goal is to achieve
+  comparable performance although we expect to be slower since we are going to store data in disk as well as in memory.
+
   Our hypothesis is that with limited memory size we can still perform GNN online training while maintaining comparable accuracy with the RBR algorithm presented in the paper.
   
 - What additional equipment or other resources will be needed?
 
-  GPUs, discussions with professor or TAs about possible novelty or implementation methods.
+  If needed, we can use GPU-equipped machines on Chameleon: https://www.chameleoncloud.org/ or SCC
 
 ### Success indicators
 
