@@ -1,4 +1,4 @@
-# Streaming Graph from 
+# GNNs on Larger than Memory Streaming Graphs
 
 **Design Document:** [Here](DESIGN.md)
 
