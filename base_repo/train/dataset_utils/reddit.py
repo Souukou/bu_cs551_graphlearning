@@ -14,7 +14,7 @@ import dgl
 
 #path = "datasets/reddit/"
 FILES = ["feat_data.npy", "targets.npy", "edges_dataframe.csv"]
-URL = "https://uoe-my.sharepoint.com/:u:/g/personal/s2121589_ed_ac_uk/EX6tn7RXc39LoIwZ0D5F9EcBofEGksT7nIuOrwIqCfXnPw?Download=1"
+URL = "file:///Users/adrish/Downloads/reddit-3/reddit.zip"
 
 def preprocess(path, restrict=100000):
 
