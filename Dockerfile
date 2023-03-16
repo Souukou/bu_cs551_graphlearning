@@ -15,7 +15,7 @@ RUN apt-get install -y librocksdb-dev libsnappy-dev zlib1g-dev libbz2-dev libgfl
 RUN apt-get install -y openjdk-8-jdk
 RUN apt-get autoremove && apt-get clean
 RUN pip3 install python-rocksdb
-RUN pip3 install torch==1.13.1+cu116 torchvision==0.14.1+cu116 torchaudio==0.13.1 --extra-index-url https://download.pytorch.org/whl/cu116 && pip3 cache purge
+RUN pip3 install torch==1.13.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 && pip3 cache purge
 RUN pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f https://data.pyg.org/whl/torch-1.13.0+cu116.html && pip3 cache purge
 RUN curl -sSL https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz | tar -xzv
 RUN curl -ssL https://archive.apache.org/dist/flink/flink-1.14.4/flink-1.14.4-bin-scala_2.11.tgz | tar -xzv
