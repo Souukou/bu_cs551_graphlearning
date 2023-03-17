@@ -23,13 +23,13 @@ class OrderBySourceNode(rocksdb.interfaces.Comparator):
     
 
 dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
+
 opts = rocksdb.Options()
 opts.create_if_missing = True
 opts.max_open_files = 300000
 opts.write_buffer_size = 67108864
 opts.max_write_buffer_number = 3
 opts.target_file_size_base = 67108864
-
 opts.table_factory = rocksdb.BlockBasedTableFactory(
     filter_policy=rocksdb.BloomFilterPolicy(10),
     block_cache=rocksdb.LRUCache(2 * (1024 ** 3)),
@@ -37,9 +37,19 @@ opts.table_factory = rocksdb.BlockBasedTableFactory(
 
 
 nodesdb = rocksdb.DB("dataset/nodes.db", opts)
+
+
 opts2 = rocksdb.Options()
 opts2.create_if_missing = True
 opts2.comparator = OrderBySourceNode()
+opts2.max_open_files = 300000
+opts2.write_buffer_size = 67108864
+opts2.max_write_buffer_number = 3
+opts2.target_file_size_base = 67108864
+opts2.table_factory = rocksdb.BlockBasedTableFactory(
+    filter_policy=rocksdb.BloomFilterPolicy(10),
+    block_cache=rocksdb.LRUCache(2 * (1024 ** 3)),
+    block_cache_compressed=rocksdb.LRUCache(500 * (1024 ** 2)))
 
 edgesdb = rocksdb.DB("dataset/edges.db", opts2)
 
@@ -60,4 +70,6 @@ for idx in tqdm.tqdm(range(dataset.num_nodes)):
 for idx in tqdm.tqdm(range(dataset.num_edges)):
   source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
   key = f"{source}|{target}"
+  edgesdb.put(key.encode('UTF-8'), b'\x01')
+  key = f"{target}|{source}"
   edgesdb.put(key.encode('UTF-8'), b'\x01')
