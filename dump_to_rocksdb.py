@@ -21,8 +21,7 @@ class OrderBySourceNode(rocksdb.interfaces.Comparator):
   def name(self):
     return "OrderBySourceNode".encode("UTF-8")
     
-
-dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
+dataset = torch_geometric.datasets.KarateClub()[0]
 
 opts = rocksdb.Options()
 opts.create_if_missing = True
@@ -36,7 +35,7 @@ opts.table_factory = rocksdb.BlockBasedTableFactory(
     block_cache_compressed=rocksdb.LRUCache(500 * (1024 ** 2)))
 
 
-nodesdb = rocksdb.DB("dataset/nodes.db", opts)
+nodesdb = rocksdb.DB("dataset-test/nodes.db", opts)
 
 
 opts2 = rocksdb.Options()
@@ -51,21 +50,21 @@ opts2.table_factory = rocksdb.BlockBasedTableFactory(
     block_cache=rocksdb.LRUCache(2 * (1024 ** 3)),
     block_cache_compressed=rocksdb.LRUCache(500 * (1024 ** 2)))
 
-edgesdb = rocksdb.DB("dataset/edges.db", opts2)
+edgesdb = rocksdb.DB("dataset-test/edges.db", opts2)
 
 
 for idx in tqdm.tqdm(range(dataset.num_nodes)):
   x = dataset.x[idx].numpy()
   y = dataset.y[idx].numpy()
   mask = 0 # Train Mask
-  mask = 1 & int(dataset.val_mask[idx])
-  mask = 2 & int(dataset.test_mask[idx])
+#  mask = 1 & int(dataset.val_mask[idx])
+#  mask = 2 & int(dataset.test_mask[idx])
   # First 8 java bytes is mask
   # Next 8 java bytes is label
   # Next remaining bytes == numpy array of feature vector
   value = mask.to_bytes(8, byteorder="big") + int(y).to_bytes(8, byteorder="big")
   value = value + x.tobytes()
-  nodesdb.put(bytes(idx), value)
+  nodesdb.put(str(idx).encode("UTF-8"), value)
 
 for idx in tqdm.tqdm(range(dataset.num_edges)):
   source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
