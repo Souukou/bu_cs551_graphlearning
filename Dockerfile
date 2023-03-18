@@ -22,6 +22,6 @@ RUN curl -ssL https://archive.apache.org/dist/flink/flink-1.14.4/flink-1.14.4-bi
 RUN sed -i.bak 's/taskmanager.numberOfTaskSlots: 1/taskmanager.numberOfTaskSlots: 2/' "${FLINK_HOME}/conf/flink-conf.yaml"
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 0
 RUN apt-get install -y git
-RUN git clone --recursive https://www.github.com/flinkextended/dl-on-flink /tmp/dl-on-flink && pip install /tmp/dl-on-flink/dl-on-flink-framework/python /tmp/dl-on-flink/dl-on-flink-pytorch/python && rm -rf /tmp/dl-on-flink
+RUN git clone --recursive https://www.github.com/flink-extended/dl-on-flink /tmp/dl-on-flink && pip install /tmp/dl-on-flink/dl-on-flink-framework/python /tmp/dl-on-flink/dl-on-flink-pytorch/python && rm -rf /tmp/dl-on-flink
 WORKDIR /opt
 CMD ["/bin/bash"]
