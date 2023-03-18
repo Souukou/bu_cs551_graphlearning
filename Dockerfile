@@ -19,9 +19,7 @@ RUN pip3 install torch==1.13.1+cu116 --extra-index-url https://download.pytorch.
 RUN pip3 install pyg_lib torch_scatter torch_sparse torch_cluster torch_spline_conv torch_geometric -f https://data.pyg.org/whl/torch-1.13.0+cu116.html && pip3 cache purge
 RUN curl -sSL https://dlcdn.apache.org/maven/maven-3/3.8.8/binaries/apache-maven-3.8.8-bin.tar.gz | tar -xzv
 RUN curl -ssL https://archive.apache.org/dist/flink/flink-1.14.4/flink-1.14.4-bin-scala_2.11.tgz | tar -xzv
-RUN pushd "${FLINK_HOME}" && sed -i.bak 's/taskmanager.numberOfTaskSlots: 1/taskmanager.numberOfTaskSlots: 2/' ./conf/flink-conf.yaml && popd
+RUN sed -i.bak 's/taskmanager.numberOfTaskSlots: 1/taskmanager.numberOfTaskSlots: 2/' "${FLINK_HOME}/conf/flink-conf.yaml"
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.7 0
-RUN bash -c "${FLINK_HOME}/bin/start-cluster.sh"
-EXPOSE 8081
 WORKDIR /opt
 CMD ["/bin/bash"]
