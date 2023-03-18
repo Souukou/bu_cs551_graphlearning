@@ -1,0 +1,4 @@
+org/apache/flink/quickstart/WikiEdits$1.class
+org/apache/flink/quickstart/WikiEdits.class
+org/apache/flink/quickstart/WikiEdits$MyFilterFunction.class
+org/apache/flink/quickstart/WikiEdits$MyMapFunction.class
