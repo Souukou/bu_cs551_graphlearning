@@ -27,6 +27,6 @@ class MyMapFunctionTest {
 
         assertEquals(result.f0, "Iasonas");
         assertEquals(result.f1, 42);
-        verify();
+        verify(editEvent);
     }
 }

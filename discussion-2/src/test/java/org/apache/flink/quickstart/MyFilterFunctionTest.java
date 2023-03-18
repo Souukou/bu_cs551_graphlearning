@@ -21,13 +21,13 @@ class MyFilterFunctionTest {
         expect(editEvent.getByteDiff()).andReturn(42);
         replay(editEvent);
         assertTrue(myFilter.filter(editEvent));
-        verify();
+        verify(editEvent);
     }
     @Test
     void testFilterWithoutByteDiff() {
         expect(editEvent.getByteDiff()).andReturn(0);
         replay(editEvent);
         assertFalse(myFilter.filter(editEvent));
-        verify();
+        verify(editEvent);
     }
 }

@@ -18,14 +18,14 @@
 
 package org.apache.flink.quickstart;
 
-import org.apache.flink.api.common.functions.FilterFunction;
-import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple4;
+
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditsSource;
+
+import java.util.List;
 
 /**
  * A simple Flink program that processes the Wikipedia edits stream.
@@ -46,7 +46,12 @@ public class WikiEdits {
 
         DataStream<Tuple2<String, Integer>> mappedEdits = filtered.map(new MyMapFunction());
 
-        mappedEdits.print();
+        DataStream<List<Tuple2<String, Integer>>> windowed = mappedEdits
+                .countWindowAll(10)
+                .aggregate(new MyAggregateFunction());
+
+        // print the results to the console
+        windowed.print();
 
         // Execute the program
         env.execute("Print Wikipedia Edits Stream");
