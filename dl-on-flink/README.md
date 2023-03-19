@@ -1,4 +1,4 @@
-# COPIPED FROM: https://www.github.com/flink-extended/dl-on-flink
+# COPIED FROM: https://www.github.com/flink-extended/dl-on-flink
 # Deep Learning on Flink
 
 Deep Learning on Flink aims to integrate Flink and deep learning frameworks
