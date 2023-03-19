@@ -14,7 +14,7 @@ class OrderBySourceNode(rocksdb.interfaces.Comparator):
     s1, t1 = right.decode("UTF-8").split("|")
     if int(s0) < int(s1):
       return -1
-    elif int(s0) > int(s1):
+    if int(s1) > int(s0):
       return 1
     return 0
 
@@ -52,6 +52,19 @@ opts2.table_factory = rocksdb.BlockBasedTableFactory(
 
 edgesdb = rocksdb.DB("dataset-test/edges.db", opts2)
 
+opts3 = rocksdb.Options()
+opts3.create_if_missing = True
+opts3.comparator = OrderBySourceNode()
+opts3.max_open_files = 300000
+opts3.write_buffer_size = 67108864
+opts3.max_write_buffer_number = 3
+opts3.target_file_size_base = 67108864
+opts3.table_factory = rocksdb.BlockBasedTableFactory(
+    filter_policy=rocksdb.BloomFilterPolicy(10),
+    block_cache=rocksdb.LRUCache(2 * (1024 ** 3)),
+    block_cache_compressed=rocksdb.LRUCache(500 * (1024 ** 2)))
+
+neighbordb = rocksdb.DB("dataset-test/neigbor.db", opts3)
 
 for idx in tqdm.tqdm(range(dataset.num_nodes)):
   x = dataset.x[idx].numpy()
@@ -66,9 +79,15 @@ for idx in tqdm.tqdm(range(dataset.num_nodes)):
   value = value + x.tobytes()
   nodesdb.put(str(idx).encode("UTF-8"), value)
 
+
 for idx in tqdm.tqdm(range(dataset.num_edges)):
   source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
-  key = f"{source}|{target}"
-  edgesdb.put(key.encode('UTF-8'), b'\x01')
-  key = f"{target}|{source}"
-  edgesdb.put(key.encode('UTF-8'), b'\x01')
+  key = f"{source}|{target}".encode('UTF-8')
+  if not neighbordb.key_may_exist(f"{source}".encode('UTF-8')):
+    neighbordb.put(f"{source}".encode('UTF-8'), key)
+  edgesdb.put(key, b'\x01')
+
+  key = f"{target}|{source}".encode('UTF-8')
+  edgesdb.put(key, b'\x01')
+  if not neighbordb.key_may_exist(f"{target}".encode('UTF-8')):
+    neighbordb.put(f"{target}".encode('UTF-8'), key)
