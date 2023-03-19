@@ -82,6 +82,7 @@
         <module>dl-on-flink-examples</module>
         <module>dl-on-flink-lib</module>
         <module>dl-on-flink-dist</module>
+        <module>dl-on-flink-graphlearning</module>
     </modules>
 
     <properties>
