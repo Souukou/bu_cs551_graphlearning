@@ -18,8 +18,6 @@
 
 package org.apache.flink.quickstart;
 
-import org.apache.flink.api.java.tuple.Tuple2;
-
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
@@ -43,13 +41,11 @@ public class WikiEdits {
         // Filter events with byte diff < 0
         DataStream<WikipediaEditEvent> filtered = edits.filter(new MyFilterFunction());
 
-        DataStream<Tuple2<String, Integer>> mappedEdits = filtered.map(new MyMapFunction());
+        DataStream<GraphChange> mappedEdits = filtered.map(new MyMapFunction());
 
-        DataStream<List<Tuple2<String, Integer>>> windowed = mappedEdits
+        DataStream<List<GraphChange>> windowed = mappedEdits
                 .countWindowAll(10)
                 .aggregate(new MyAggregateFunction());
-
-
 
         // print the results to the console
         windowed.print();
