@@ -1,32 +1,30 @@
 package org.apache.flink.quickstart;
 
 import org.apache.flink.api.common.functions.AggregateFunction;
-import org.apache.flink.api.java.tuple.Tuple2;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class MyAggregateFunction
-        implements AggregateFunction<Tuple2<String, Integer>, List<Tuple2<String, Integer>>, List<Tuple2<String, Integer>>> {
+        implements AggregateFunction<GraphChange, List<GraphChange>, List<GraphChange>> {
     @Override
-    public List<Tuple2<String, Integer>> createAccumulator() {
-        return new ArrayList<Tuple2<String, Integer>>();
+    public List<GraphChange> createAccumulator() {
+        return new ArrayList<GraphChange>();
     }
 
     @Override
-    public List<Tuple2<String, Integer>> add(Tuple2<String, Integer> value, List<Tuple2<String, Integer>> accumulator) {
+    public List<GraphChange> add(GraphChange value, List<GraphChange> accumulator) {
         accumulator.add(value);
         return accumulator;
     }
 
     @Override
-    public List<Tuple2<String, Integer>> getResult(List<Tuple2<String, Integer>>accumulator) {
+    public List<GraphChange> getResult(List<GraphChange> accumulator) {
         return accumulator;
     }
 
     @Override
-    public List<Tuple2<String, Integer>> merge(List<Tuple2<String, Integer>> acc1, List<Tuple2<String, Integer>> acc2) {
-        for (Tuple2<String, Integer> v : acc2) {
+    public List<GraphChange> merge(List<GraphChange> acc1, List<GraphChange> acc2) {
+        for (GraphChange v : acc2) {
            acc1.add(v);
         }
         return acc1;

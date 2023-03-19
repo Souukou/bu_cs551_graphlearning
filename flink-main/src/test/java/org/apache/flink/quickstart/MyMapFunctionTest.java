@@ -1,6 +1,5 @@
 package org.apache.flink.quickstart;
 
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,10 +22,10 @@ class MyMapFunctionTest {
         expect(editEvent.getByteDiff()).andReturn(42);
         replay(editEvent);
 
-        Tuple2 result = myMap.map(editEvent);
+        GraphChange result = myMap.map(editEvent);
 
-        assertEquals(result.f0, "Iasonas");
-        assertEquals(result.f1, 42);
+        assertEquals(result.getInputGraphChange().f0, "Iasonas");
+        assertEquals(result.getInputGraphChange().f1, 42);
         verify(editEvent);
     }
 }
