@@ -52,6 +52,12 @@ under the License.
 	</repositories>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.26</version>
+			<scope>provided</scope>
+		</dependency>
 		<!-- Flink unit test dependencies -->
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
