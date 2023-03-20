@@ -54,7 +54,7 @@ public class StreamingGraph {
                                 .option("number-of-rows", String.valueOf(sampleCount))
                                 .build());
 
-        DataStream<Row> inputStream;
+        DataStream<Row> inputStream = new InputStream().getStream();
         if ("train".equals(mode)) train(modelPath, epoch, statementSet, inputStream, pyScript);
     }
 

@@ -3,11 +3,15 @@ package org.apache.flink.main;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.apache.flink.api.java.tuple.Tuple2;
+import org.apache.flink.api.java.tuple.Tuple5;
 
 @Getter
 @AllArgsConstructor
 public class GraphChange {
-    private Tuple2<String, Integer> inputGraphChange;
+    /*
+        SourceNode
+     */
+    private Tuple5<Integer, Short, Integer, byte[], String> inputGraphChange;
 
     public String toString() {
         return "("

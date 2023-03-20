@@ -22,6 +22,8 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditsSource;
+import org.apache.flink.types.Row;
+
 import java.util.List;
 
 /**
@@ -43,12 +45,14 @@ public class WikiEdits {
 
         DataStream<GraphChange> mappedEdits = filtered.map(new MyMapFunction());
 
-        DataStream<List<GraphChange>> windowed = mappedEdits
-                .countWindowAll(10)
-                .aggregate(new MyAggregateFunction());
+//        DataStream<List<GraphChange>> windowed = mappedEdits
+//                .countWindowAll(10)
+//                .aggregate(new MyAggregateFunction());
 
         // print the results to the console
-        windowed.print();
+        DataStream<Row> rows = mappedEdits.map(new MapToRow());
+
+        rows.print();
 
         // Execute the program
         env.execute("Print Wikipedia Edits Stream");
