@@ -2,7 +2,9 @@ package org.flinkextended.team2.graph;
 
 import org.flinkextended.flink.ml.operator.client.NodeUtils;
 import org.flinkextended.flink.ml.operator.util.ReflectionUtils;
-import org.flinkextended.flink.ml.pytorch.PytorchUtils;
+import org.flinkextended.flink.ml.pytorch.PyTorchClusterConfig;
+import org.flinkextended.flink.ml.pytorch.PyTorchNodeIterationBody;
+import org.flinkextended.flink.ml.pytorch.PyTorchUtils;
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.iteration.DataStreamList;
@@ -18,7 +20,7 @@ import org.apache.flink.table.api.bridge.java.internal.StreamTableEnvironmentImp
 import org.apache.flink.table.api.internal.StatementSetImpl;
 import org.apache.flink.types.Row;
 
-public class GraphPytorchUtils extends PytorchUtils {
+public class GraphPyTorchUtils extends PyTorchUtils {
     public static void train(
             StatementSet statementSet,
             DataStream<Row> inputDataStream,
