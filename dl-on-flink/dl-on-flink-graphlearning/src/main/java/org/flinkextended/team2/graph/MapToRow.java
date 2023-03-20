@@ -10,5 +10,4 @@ public class MapToRow implements MapFunction<GraphChange, Row> {
         Tuple5<Integer, Short, Integer, byte[], String> tuple = graphChange.getInputGraphChange();
         return Row.of(tuple.f0, tuple.f4, tuple.f2, tuple.f3);
     }
-
 }
