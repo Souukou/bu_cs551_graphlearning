@@ -62,6 +62,7 @@ public class RocksDBSourceFunction
                     short mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
                     int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
                     byte[] embedding = Arrays.copyOfRange(value, 6, value.length + 1);
+                    System.out.println("Inside RocksDB Iter");
                     String BracketNeighbors =
                             NeighborReader.find_neighbors(key, neighborsDB, edgesDB).toString();
                     String neighbors = BracketNeighbors.substring(1, BracketNeighbors.length() - 1);
@@ -70,7 +71,6 @@ public class RocksDBSourceFunction
                     }
                 }
             }
-            Thread.sleep(1000);
         }
     }
 

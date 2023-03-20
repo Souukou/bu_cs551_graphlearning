@@ -32,6 +32,7 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
     def parse_record(self, record):
         df = pd.read_csv(StringIO(record), header=None)
         tensors = []
+        print("inside parse record")
         for idx, key in enumerate(df.columns):
             print(idx, key)
             tensors.append(tensor.tensors(1.))
