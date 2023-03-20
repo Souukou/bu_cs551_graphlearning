@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.flink.quickstart;
+package org.apache.flink.main;
 
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;

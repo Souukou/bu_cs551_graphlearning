@@ -20,7 +20,7 @@ under the License.
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.apache.flink.quickstart</groupId>
+	<groupId>org.apache.flink.main</groupId>
 	<artifactId>flink-java-project</artifactId>
 	<version>0.1</version>
 	<packaging>jar</packaging>
@@ -199,7 +199,7 @@ under the License.
 							</filters>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>org.apache.flink.quickstart.WikiEdits</mainClass>
+									<mainClass>org.apache.flink.main.WikiEdits</mainClass>
 								</transformer>
 							</transformers>
 						</configuration>

@@ -1,4 +1,4 @@
-package org.apache.flink.quickstart;
+package org.apache.flink.main;
 
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple2;

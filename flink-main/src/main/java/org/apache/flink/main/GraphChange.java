@@ -1,4 +1,4 @@
-package org.apache.flink.quickstart;
+package org.apache.flink.main;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

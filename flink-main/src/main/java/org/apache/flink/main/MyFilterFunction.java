@@ -1,4 +1,4 @@
-package org.apache.flink.quickstart;
+package org.apache.flink.main;
 
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
