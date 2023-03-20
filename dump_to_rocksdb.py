@@ -75,7 +75,7 @@ for idx in tqdm.tqdm(range(dataset.num_nodes)):
   # First 8 java bytes is mask
   # Next 8 java bytes is label
   # Next remaining bytes == numpy array of feature vector
-  value = mask.to_bytes(8, byteorder="big") + int(y).to_bytes(8, byteorder="big")
+  value = mask.to_bytes(2, byteorder="big") + int(y).to_bytes(4, byteorder="big")
   value = value + x.tobytes()
   nodesdb.put(str(idx).encode("UTF-8"), value)
 
