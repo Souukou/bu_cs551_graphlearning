@@ -1,10 +1,10 @@
 package org.flinkextended.team2.graph;
 
 import org.flinkextended.flink.ml.pytorch.PyTorchClusterConfig;
-import org.flinkextended.flink.ml.pytorch.PyTorchUtils;
 import org.flinkextended.flink.ml.util.MLConstants;
 
 import org.apache.flink.api.java.utils.MultipleParameterTool;
+import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.Schema;
@@ -12,6 +12,7 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
+import org.apache.flink.types.Row;
 
 import java.util.concurrent.ExecutionException;
 
@@ -52,14 +53,16 @@ public class StreamingGraph {
                                                 .build())
                                 .option("number-of-rows", String.valueOf(sampleCount))
                                 .build());
-        if ("train".equals(mode)) train(modelPath, epoch, statementSet, sample, pyScript);
+
+        DataStream<Row> inputStream;
+        if ("train".equals(mode)) train(modelPath, epoch, statementSet, inputStream, pyScript);
     }
 
     private static void train(
             String modelPath,
             Integer epoch,
             StreamStatementSet statementSet,
-            Table sample,
+            DataStream<Row> inputStream,
             String pyScript)
             throws InterruptedException, ExecutionException {
         final PyTorchClusterConfig config =
@@ -72,7 +75,7 @@ public class StreamingGraph {
                         .setProperty("input_types", "FLOAT_64,FLOAT_64")
                         .build();
 
-        PyTorchUtils.train(statementSet, sample, config, epoch);
+        GraphPyTorchUtils.train(statementSet, inputStream, config, epoch);
         statementSet.execute().await();
     }
 }
