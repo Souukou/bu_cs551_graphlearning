@@ -1,5 +1,6 @@
 package org.apache.flink.main;
 
+
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
