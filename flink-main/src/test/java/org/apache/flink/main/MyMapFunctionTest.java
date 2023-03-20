@@ -1,4 +1,4 @@
-package org.apache.flink.quickstart;
+package org.apache.flink.main;
 
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
 import org.junit.jupiter.api.BeforeEach;
