@@ -1,3 +1,5 @@
+package org.flinkextended.team2.graph;
+
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
