@@ -75,15 +75,10 @@ public class MapToRow
                 embeddings.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
 
         // System.out.println(flatEmbeddings);
-        Row row = Row.withNames();
-        String[] names = {"src", "label", "nbr", "embed"};
-        row.setField(names[0], tuple.f0);
+        Row row = Row.withPositions();
         row.setField(0, tuple.f0);
-        row.setField(names[1], tuple.f2);
         row.setField(1, tuple.f2);
-        row.setField(names[2], tuple.f4);
         row.setField(2, tuple.f4);
-        row.setField(names[3], flatEmbeddings);
         row.setField(3, flatEmbeddings);
         return row;
     }

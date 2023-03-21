@@ -59,7 +59,7 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         return new_data
     def parse_record(self, record):
 
-        df = pd.read_csv(StringIO(record), header=None)
+        df = pd.read_csv(StringIO(record), names=["src", "label", "nbr", "embed")
 
         ############ For debugging only, remove this later ######################
         # print("we are reading the sample data from the file")
