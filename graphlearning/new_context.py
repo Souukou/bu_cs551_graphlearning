@@ -36,7 +36,7 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         print("inside parse record")
         for idx, key in enumerate(df.columns):
             print(idx, key)
-            tensors.append(tensor.tensors(1.))
+            tensors.append(torch.tensor(1.))
             continue
             if key not in ['feature', 'neighbor']:
                 cur = torch.tensor([self.decoding_single(df[key][0])], dtype=DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]])
