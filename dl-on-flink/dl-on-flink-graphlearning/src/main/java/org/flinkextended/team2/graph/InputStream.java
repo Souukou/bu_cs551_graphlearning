@@ -19,7 +19,7 @@ class InputStream {
                 new RocksDBSourceFunction(nodesPath, edgesPath, neighborPath);
         DataStream<Tuple5<Integer, Short, Integer, List<Byte>, String>> inputStream =
                 env.addSource(source);
-        DataStream<Row> rows = inputStream.map(new MapToRow(source.nodesDB));
+        DataStream<Row> rows = inputStream.map(new MapToRow(nodesPath));
 
         return rows;
     }

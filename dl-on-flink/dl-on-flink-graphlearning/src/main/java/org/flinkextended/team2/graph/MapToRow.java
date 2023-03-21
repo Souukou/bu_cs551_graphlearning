@@ -16,8 +16,22 @@ public class MapToRow
         implements MapFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>, Row> {
     private RocksDB db;
 
-    public MapToRow(RocksDB db) {
-        this.db = db;
+    public MapToRow(String path) throws RocksDBException {
+        RocksDB.loadLibrary();
+        Options options = new Options();
+        LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
+        LRUCache cacheCompressed = new LRUCache(500 * 1024 * 1024);
+        options.setTableFormatConfig(
+                new BlockBasedTableConfig()
+                        .setFilter(new BloomFilter(10, false))
+                        .setBlockCache(cache)
+                        .setBlockCacheCompressed(cacheCompressed));
+        options.setMaxOpenFiles(300000);
+        options.setWriteBufferSize(67108864);
+        options.setMaxWriteBufferNumber(3);
+        options.setTargetFileSizeBase(67108864);
+
+        this.db = RocksDB.openReadOnly(options, path);
     }
     /*
        Input: Tuple5
