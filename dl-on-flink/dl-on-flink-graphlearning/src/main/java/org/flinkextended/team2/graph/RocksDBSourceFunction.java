@@ -27,13 +27,18 @@ public class RocksDBSourceFunction
 
     private final String neighborsPath;
 
-    protected RocksDB nodesDB, edgesDB, neighborsDB;
 
     public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath)
             throws RocksDBException {
         this.nodesPath = nodesPath;
         this.edgesPath = edgesPath;
         this.neighborsPath = neighborsPath;
+    }
+
+    @Override
+    public void run(SourceContext<Tuple5<Integer, Short, Integer, List<Byte>, String>> ctx)
+                //            throws Exception
+            {
         RocksDB.loadLibrary();
         Options options = new Options();
 
@@ -49,17 +54,12 @@ public class RocksDBSourceFunction
         options.setWriteBufferSize(67108864);
         options.setMaxWriteBufferNumber(3);
         options.setTargetFileSizeBase(67108864);
-        this.nodesDB = RocksDB.open(options, nodesPath);
-        this.edgesDB = RocksDB.open(options, edgesPath);
-        this.neighborsDB = RocksDB.open(options, neighborsPath);
-    }
+        RocksDB nodesDB = RocksDB.open(options, nodesPath);
+        RocksDB edgesDB = RocksDB.open(options, edgesPath);
+        RocksDB neighborsDB = RocksDB.open(options, neighborsPath);
 
-    @Override
-    public void run(SourceContext<Tuple5<Integer, Short, Integer, List<Byte>, String>> ctx)
-                //            throws Exception
-            {
         try {
-            RocksIterator iterator = this.nodesDB.newIterator();
+            RocksIterator iterator = nodesDB.newIterator();
             iterator.seekToFirst();
             while (isRunning && iterator.isValid()) {
                 System.out.println("Rocks Iter");
@@ -72,7 +72,7 @@ public class RocksDBSourceFunction
                                 ArrayUtils.toObject(
                                         Arrays.copyOfRange(value, 6, value.length + 1)));
                 String neighbors =
-                        NeighborReader.find_neighbors(key, this.neighborsDB, this.edgesDB).stream()
+                        NeighborReader.find_neighbors(key, neighborsDB, edgesDB).stream()
                                 .map(String::valueOf)
                                 .collect(Collectors.joining("-"));
                 synchronized (ctx.getCheckpointLock()) {
