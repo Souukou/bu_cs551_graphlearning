@@ -23,7 +23,10 @@ public interface NodeReader {
         int mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 7)).getInt();
         int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 8, 15)).getInt();
         byte[] embedding = Arrays.copyOfRange(value, 16, value.length);
-        Tuple3<Integer, Integer, byte[]> entry = new Tuple3<>(mask, label, embedding);
+        List<Byte> embeddingList = Arrays.asList(Arrays.stream(embedding)
+                .boxed()
+                .toArray(Byte[]::new));
+        Tuple3<Integer, Integer, List<Byte>> entry = new Tuple3<>(mask, label, embedding);
         return entry;
     }
 }

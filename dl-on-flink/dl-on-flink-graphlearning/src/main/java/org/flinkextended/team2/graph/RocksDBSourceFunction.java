@@ -3,6 +3,7 @@ package org.flinkextended.team2.graph;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.rocksdb.*;
 
 import java.nio.ByteBuffer;
@@ -37,7 +38,6 @@ public class RocksDBSourceFunction
             {
         RocksDB.loadLibrary();
         Options options = new Options();
-        options.setCreateIfMissing(true);
 
         // Fastest RocksDB settings
         LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
@@ -63,7 +63,10 @@ public class RocksDBSourceFunction
                 byte[] value = iterator.value();
                 short mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
                 int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
-                byte[] embedding = Arrays.copyOfRange(value, 6, value.length + 1);
+                List<Byte> embedding =
+                        Arrays.asList(
+                                ArrayUtils.toObject(
+                                        Arrays.copyOfRange(value, 6, value.length + 1)));
                 String BracketNeighbors =
                         NeighborReader.find_neighbors(key, neighborsDB, edgesDB).toString();
                 String neighbors = BracketNeighbors.substring(1, BracketNeighbors.length() - 1);
