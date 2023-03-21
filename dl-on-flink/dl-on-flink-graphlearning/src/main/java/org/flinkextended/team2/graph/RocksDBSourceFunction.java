@@ -27,8 +27,7 @@ public class RocksDBSourceFunction
 
     private final String neighborsPath;
 
-    public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath)
-            throws RocksDBException {
+    public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath) {
         this.nodesPath = nodesPath;
         this.edgesPath = edgesPath;
         this.neighborsPath = neighborsPath;
@@ -36,7 +35,7 @@ public class RocksDBSourceFunction
 
     @Override
     public void run(SourceContext<Tuple5<Integer, Short, Integer, List<Byte>, String>> ctx)
-                //            throws Exception
+            throws RocksDBException //            throws Exception
             {
         RocksDB.loadLibrary();
         Options options = new Options();
