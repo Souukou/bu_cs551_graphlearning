@@ -24,7 +24,6 @@ public class MapToRow implements MapFunction<Tuple5<Integer, Short, Integer, byt
             -f3: Embedding/Feature vector (byte[])
             -f4: neighbors of nodeId, e.g. "2,5,9" (String)
      */
-    @Override
     public Tuple5<Integer, Short, Integer, byte[], String> map(Tuple5<Integer, Short, Integer, byte[], String> tuple) {
         // convert byte[] to List<Byte>
         List<Byte> nodeEmbedding = tuple.f3;
@@ -57,6 +56,6 @@ public class MapToRow implements MapFunction<Tuple5<Integer, Short, Integer, byt
 
         // System.out.println(flatEmbeddings);
         return Row.of(tuple.f0, tuple.f4, tuple.f2, flatEmbeddings);
-    }
 
+    }
 }

@@ -1,30 +1,42 @@
+
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.rocksdb.*;
-import org.apache.flink.api.java.tuple.Tuple2;
-
+import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
 /**
- * Generate a stream data of incoming graph changes, i.e. new edges from RocksDB
- * DataStream format Tuple2<Integer, Integer>(start node, end node)
+ * Generate a stream data of incoming graph changes, i.e. new nodes from RocksDB
+ * DataStream format Tuple5<Integer, Short, Integer, byte[], String>(NodeID, Mask, Label, Embedding, "Neighbors
+ * with comma seperated")
  * */
 
 
-public class RocksDBSourceFunction implements SourceFunction<Tuple2<Integer, Integer>> {
+public class RocksDBSourceFunction extends RichParallelSourceFunction<Tuple5<Integer, Short, Integer, byte[], String>> {
 
     private volatile boolean isRunning = true;
-    private final String dbPath;
+    private final String nodesPath;
 
-    public RocksDBSourceFunction(String dbPath) {
-        this.dbPath = dbPath;
+    private final String edgesPath;
+
+    private final String neighborsPath;
+
+    public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath) {
+        this.nodesPath = nodesPath;
+        this.edgesPath = edgesPath;
+        this.neighborsPath = neighborsPath;
     }
 
     @Override
-    public void run(SourceContext<Tuple2<Integer, Integer>> ctx) throws Exception
+    public void run(SourceContext<Tuple5<Integer, Short, Integer, byte[], String>> ctx) throws RocksDBException
+//            throws Exception
     {
         RocksDB.loadLibrary();
-
         Options options = new Options();
         options.setCreateIfMissing(true);
 
@@ -40,28 +52,33 @@ public class RocksDBSourceFunction implements SourceFunction<Tuple2<Integer, Int
         options.setWriteBufferSize(67108864);
         options.setMaxWriteBufferNumber(3);
         options.setTargetFileSizeBase(67108864);
-        try(RocksDB rocksDB = RocksDB.open(options, dbPath))
-        {
-            while(isRunning)
-            {
-                try(RocksIterator iterator = rocksDB.newIterator())
+        try{
+            RocksDB nodesDB = RocksDB.open(options, nodesPath);
+            RocksDB edgesDB = RocksDB.open(options, edgesPath);
+            RocksDB neighborsDB = RocksDB.open(options, neighborsPath);
+            RocksIterator iterator = nodesDB.newIterator();
+            iterator.seekToFirst();
+            while(isRunning && iterator.isValid()){
+                int key = Integer.parseInt(new String(iterator.key(), StandardCharsets.UTF_8));
+                byte[] value = iterator.value();
+                short mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
+                int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
+                byte[] embedding = Arrays.copyOfRange(value, 6, value.length + 1);
+                String BracketNeighbors = NeighborReader.find_neighbors(key, neighborsDB, edgesDB).toString();
+                String neighbors = BracketNeighbors.substring(1, BracketNeighbors.length() - 1);
+                synchronized (ctx.getCheckpointLock())
                 {
-                    for (iterator.seekToFirst(); iterator.isValid(); iterator.next())
-                    {
-                        String[] keyArray = new String(iterator.key(), StandardCharsets.UTF_8).split("\\|");
-//                        String edge = new String(iterator.key(), StandardCharsets.UTF_8);
-                        int src = Integer.parseInt(keyArray[0]);
-                        int end = Integer.parseInt(keyArray[1]);
-                        synchronized (ctx.getCheckpointLock())
-                        {
-                            ctx.collect(new Tuple2<>(src, end));
-                        }
-                    }
+                    ctx.collect(new Tuple5<>(key, mask, label, embedding, neighbors));
                 }
-                // wait for 1 second before reading next coming edge
-                Thread.sleep(1000);
+                iterator.next();
+
             }
+        }catch (RocksDBException e){
+            System.err.println("Error opening the RocksDB: " + e);
         }
+
+//        try(RocksDB rocksDB = RocksDB.open(options, dbPath))
+//        {
 
     }
 
@@ -70,4 +87,5 @@ public class RocksDBSourceFunction implements SourceFunction<Tuple2<Integer, Int
         isRunning = false;
 
     }
+
 }
