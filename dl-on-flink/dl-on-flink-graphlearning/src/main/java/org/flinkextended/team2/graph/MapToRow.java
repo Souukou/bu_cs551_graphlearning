@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MapToRow implements MapFunction<Tuple5<Integer, Short, Integer, byte[], String>, Row> {
+public class MapToRow implements MapFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>, Row> {
     private RocksDB db;
 
     public MapToRow(RocksDB db) {
