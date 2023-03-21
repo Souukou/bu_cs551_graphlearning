@@ -9,6 +9,8 @@ import org.rocksdb.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Generate a stream data of incoming graph changes, i.e. new nodes from RocksDB DataStream format
@@ -16,7 +18,7 @@ import java.util.Arrays;
  * comma seperated")
  */
 public class RocksDBSourceFunction
-        extends RichParallelSourceFunction<Tuple5<Integer, Short, Integer, byte[], String>> {
+        extends RichParallelSourceFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>> {
 
     private volatile boolean isRunning = true;
     private final String nodesPath;
@@ -25,17 +27,13 @@ public class RocksDBSourceFunction
 
     private final String neighborsPath;
 
-    public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath) {
+    protected RocksDB nodesDB, edgesDB, neighborsDB;
+
+    public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath)
+            throws RocksDBException {
         this.nodesPath = nodesPath;
         this.edgesPath = edgesPath;
         this.neighborsPath = neighborsPath;
-    }
-
-    @Override
-    public void run(SourceContext<Tuple5<Integer, Short, Integer, byte[], String>> ctx)
-            throws RocksDBException
-                //            throws Exception
-            {
         RocksDB.loadLibrary();
         Options options = new Options();
 
@@ -51,11 +49,17 @@ public class RocksDBSourceFunction
         options.setWriteBufferSize(67108864);
         options.setMaxWriteBufferNumber(3);
         options.setTargetFileSizeBase(67108864);
+        this.nodesDB = RocksDB.open(options, nodesPath);
+        this.edgesDB = RocksDB.open(options, edgesPath);
+        this.neighborsDB = RocksDB.open(options, neighborsPath);
+    }
+
+    @Override
+    public void run(SourceContext<Tuple5<Integer, Short, Integer, List<Byte>, String>> ctx)
+                //            throws Exception
+            {
         try {
-            RocksDB nodesDB = RocksDB.open(options, nodesPath);
-            RocksDB edgesDB = RocksDB.open(options, edgesPath);
-            RocksDB neighborsDB = RocksDB.open(options, neighborsPath);
-            RocksIterator iterator = nodesDB.newIterator();
+            RocksIterator iterator = this.nodesDB.newIterator();
             iterator.seekToFirst();
             while (isRunning && iterator.isValid()) {
                 System.out.println("Rocks Iter");
@@ -67,9 +71,10 @@ public class RocksDBSourceFunction
                         Arrays.asList(
                                 ArrayUtils.toObject(
                                         Arrays.copyOfRange(value, 6, value.length + 1)));
-                String BracketNeighbors =
-                        NeighborReader.find_neighbors(key, neighborsDB, edgesDB).toString();
-                String neighbors = BracketNeighbors.substring(1, BracketNeighbors.length() - 1);
+                String neighbors =
+                        NeighborReader.find_neighbors(key, this.neighborsDB, this.edgesDB).stream()
+                                .map(String::valueOf)
+                                .collect(Collectors.joining("-"));
                 synchronized (ctx.getCheckpointLock()) {
                     ctx.collect(new Tuple5<>(key, mask, label, embedding, neighbors));
                 }

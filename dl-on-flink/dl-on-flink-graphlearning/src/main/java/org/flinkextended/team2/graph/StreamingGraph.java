@@ -14,6 +14,8 @@ import org.apache.flink.table.api.bridge.java.StreamStatementSet;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 
+import org.rocksdb.*;
+
 import java.util.concurrent.ExecutionException;
 
 public class StreamingGraph {
@@ -23,7 +25,8 @@ public class StreamingGraph {
     private static final String MODE = "mode";
     private static final String PYSCRIPT = "pyscript";
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public static void main(String[] args)
+            throws ExecutionException, InterruptedException, RocksDBException {
         final MultipleParameterTool params = MultipleParameterTool.fromArgs(args);
         final String mode = params.get(MODE, "train");
 
