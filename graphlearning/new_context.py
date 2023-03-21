@@ -3,6 +3,7 @@ from dl_on_flink_pytorch.pytorch_context import PyTorchContext
 from dl_on_flink_pytorch.flink_stream_dataset import FlinkStreamDataset, DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE
 from io import StringIO
 import pandas as pd
+import torch
 
 class NewPyTorchContext(PyTorchContext):
     def get_dataset_from_flink(self) -> FlinkStreamDataset:
