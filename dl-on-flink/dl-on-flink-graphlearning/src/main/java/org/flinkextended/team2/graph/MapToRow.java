@@ -14,24 +14,11 @@ import java.util.stream.Stream;
 
 public class MapToRow
         implements MapFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>, Row> {
-    private RocksDB db;
 
-    public MapToRow(String path) throws RocksDBException {
-        RocksDB.loadLibrary();
-        Options options = new Options();
-        LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
-        LRUCache cacheCompressed = new LRUCache(500 * 1024 * 1024);
-        options.setTableFormatConfig(
-                new BlockBasedTableConfig()
-                        .setFilter(new BloomFilter(10, false))
-                        .setBlockCache(cache)
-                        .setBlockCacheCompressed(cacheCompressed));
-        options.setMaxOpenFiles(300000);
-        options.setWriteBufferSize(67108864);
-        options.setMaxWriteBufferNumber(3);
-        options.setTargetFileSizeBase(67108864);
+    private final String db_path;
 
-        this.db = RocksDB.openReadOnly(options, path);
+    public MapToRow(String path) {
+        this.db_path = path;
     }
     /*
        Input: Tuple5
@@ -46,6 +33,21 @@ public class MapToRow
         // convert byte[] to List<Byte>
         List<Byte> nodeEmbedding = tuple.f3;
         // System.out.println(nodeEmbedding);
+        RocksDB.loadLibrary();
+        Options options = new Options();
+        LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
+        LRUCache cacheCompressed = new LRUCache(500 * 1024 * 1024);
+        options.setTableFormatConfig(
+                new BlockBasedTableConfig()
+                        .setFilter(new BloomFilter(10, false))
+                        .setBlockCache(cache)
+                        .setBlockCacheCompressed(cacheCompressed));
+        options.setMaxOpenFiles(300000);
+        options.setWriteBufferSize(67108864);
+        options.setMaxWriteBufferNumber(3);
+        options.setTargetFileSizeBase(67108864);
+
+        RocksDB db = RocksDB.openReadOnly(options, this.db_path);
 
         String neighbors = tuple.f4;
 
