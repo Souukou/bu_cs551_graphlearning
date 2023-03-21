@@ -3,7 +3,7 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.rocksdb.*;
 import org.apache.flink.api.java.tuple.Tuple5;
-
+import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.Arrays;
  * */
 
 
-public class RocksDBSourceFunction implements SourceFunction<Tuple5<Integer, Short, Integer, byte[], String>> {
+public class RocksDBSourceFunction extends RichParallelSourceFunction<Tuple5<Integer, Short, Integer, byte[], String>> {
 
     private volatile boolean isRunning = true;
     private final String nodesPath;
@@ -33,7 +33,8 @@ public class RocksDBSourceFunction implements SourceFunction<Tuple5<Integer, Sho
     }
 
     @Override
-    public void run(SourceContext<Tuple5<Integer, Short, Integer, byte[], String>> ctx) throws Exception
+    public void run(SourceContext<Tuple5<Integer, Short, Integer, byte[], String>> ctx) throws RocksDBException
+//            throws Exception
     {
         RocksDB.loadLibrary();
         Options options = new Options();
@@ -51,32 +52,33 @@ public class RocksDBSourceFunction implements SourceFunction<Tuple5<Integer, Sho
         options.setWriteBufferSize(67108864);
         options.setMaxWriteBufferNumber(3);
         options.setTargetFileSizeBase(67108864);
-        RocksDB nodesDB = RocksDB.open(options, nodesPath);
-        RocksDB edgesDB = RocksDB.open(options, edgesPath);
-        RocksDB neighborsDB = RocksDB.open(options, neighborsPath);
+        try{
+            RocksDB nodesDB = RocksDB.open(options, nodesPath);
+            RocksDB edgesDB = RocksDB.open(options, edgesPath);
+            RocksDB neighborsDB = RocksDB.open(options, neighborsPath);
+            RocksIterator iterator = nodesDB.newIterator();
+            iterator.seekToFirst();
+            while(isRunning && iterator.isValid()){
+                int key = Integer.parseInt(new String(iterator.key(), StandardCharsets.UTF_8));
+                byte[] value = iterator.value();
+                short mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
+                int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
+                byte[] embedding = Arrays.copyOfRange(value, 6, value.length + 1);
+                String BracketNeighbors = NeighborReader.find_neighbors(key, neighborsDB, edgesDB).toString();
+                String neighbors = BracketNeighbors.substring(1, BracketNeighbors.length() - 1);
+                synchronized (ctx.getCheckpointLock())
+                {
+                    ctx.collect(new Tuple5<>(key, mask, label, embedding, neighbors));
+                }
+                iterator.next();
+
+            }
+        }catch (RocksDBException e){
+            System.err.println("Error opening the RocksDB: " + e);
+        }
+
 //        try(RocksDB rocksDB = RocksDB.open(options, dbPath))
 //        {
-        while(isRunning)
-        {
-            try(RocksIterator iterator = nodesDB.newIterator())
-            {
-                for (iterator.seekToFirst(); iterator.isValid(); iterator.next())
-                {
-                    int key = Integer.parseInt(new String(iterator.key(), StandardCharsets.UTF_8));
-                    byte[] value = iterator.value();
-                    short mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
-                    int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
-                    byte[] embedding = Arrays.copyOfRange(value, 6, value.length + 1);
-                    String BracketNeighbors = NeighborReader.find_neighbors(key, neighborsDB, edgesDB).toString();
-                    String neighbors = BracketNeighbors.substring(1, BracketNeighbors.length() - 1);
-                    synchronized (ctx.getCheckpointLock())
-                    {
-                        ctx.collect(new Tuple5<>(key, mask, label, embedding, neighbors));
-                    }
-                }
-            }
-            Thread.sleep(1000);
-        }
 
     }
 
@@ -85,4 +87,5 @@ public class RocksDBSourceFunction implements SourceFunction<Tuple5<Integer, Sho
         isRunning = false;
 
     }
+
 }
