@@ -27,7 +27,6 @@ public class RocksDBSourceFunction
 
     private final String neighborsPath;
 
-
     public RocksDBSourceFunction(String nodesPath, String edgesPath, String neighborsPath)
             throws RocksDBException {
         this.nodesPath = nodesPath;
