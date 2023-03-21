@@ -52,11 +52,12 @@ public class RocksDBSourceFunction
         options.setWriteBufferSize(67108864);
         options.setMaxWriteBufferNumber(3);
         options.setTargetFileSizeBase(67108864);
-        RocksDB nodesDB = RocksDB.openReadOnly(options, nodesPath);
-        RocksDB edgesDB = RocksDB.openReadOnly(options, edgesPath);
-        RocksDB neighborsDB = RocksDB.openReadOnly(options, neighborsPath);
 
         try {
+            RocksDB nodesDB = RocksDB.openReadOnly(options, nodesPath);
+            RocksDB edgesDB = RocksDB.openReadOnly(options, edgesPath);
+            RocksDB neighborsDB = RocksDB.openReadOnly(options, neighborsPath);
+
             RocksIterator iterator = nodesDB.newIterator();
             iterator.seekToFirst();
             while (isRunning && iterator.isValid()) {
