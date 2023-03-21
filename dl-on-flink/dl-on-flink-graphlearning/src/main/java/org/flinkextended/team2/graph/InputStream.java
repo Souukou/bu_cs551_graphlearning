@@ -10,10 +10,13 @@ class InputStream {
     String edgesPath = "dataset-test/edges.db";
     String neighborPath = "dataset-test/neighbor.db";
 
-    DataStream<Row> getStream(StreamExecutionEnvironment env) {
-        DataStream<Tuple5<Integer, Short, Integer, byte[], String>> inputStream =
-                env.addSource(new RocksDBSourceFunction(nodesPath, edgesPath, neighborPath));
-        DataStream<Row> rows = inputStream.map(new MapToRow());
+
+    DataStream<Row> getStream(RocksDB db) {
+        DataStream<Tuple5<Integer, Short, Integer, List<Byte>, String>> inputStream = new RocksDBSourceFunction(
+                nodesPath, edgesPath, neighborPath
+        );
+        DataStream<Row> rows = inputStream.map(new MapToRow(db));
+
         return rows;
     }
 }
