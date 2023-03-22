@@ -58,7 +58,11 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         # new_data = {'x': feats, 'edge_index': new_edges, 'y': label, 'mask_all': mask_all}
         return new_data
     def parse_record(self, record):
+        
+        print("#################")
+        print(record)
 
+        print("#################")
         df = pd.read_csv(StringIO(record), names=["src", "label", "nbr", "embed"])
 
         ############ For debugging only, remove this later ######################

@@ -75,7 +75,7 @@ public class StreamingGraph {
                         .setProperty(
                                 MLConstants.CONFIG_STORAGE_TYPE, MLConstants.STORAGE_LOCAL_FILE)
                         .setProperty("model_save_path", modelPath)
-                        .setProperty("input_types", "FLOAT_64,FLOAT_64")
+                        .setProperty("input_types", "INT_64,INT_64,STRING,STRING")
                         .build();
 
         GraphPyTorchUtils.train(statementSet, inputStream, config, epoch);
