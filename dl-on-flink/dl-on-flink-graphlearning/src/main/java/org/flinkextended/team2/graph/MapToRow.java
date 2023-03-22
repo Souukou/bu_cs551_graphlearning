@@ -5,6 +5,8 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.types.Row;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.ArrayUtils;
 import org.rocksdb.*;
 
 import java.util.ArrayList;
@@ -31,7 +33,8 @@ public class MapToRow
     public Row map(Tuple5<Integer, Short, Integer, List<Byte>, String> tuple)
             throws RocksDBException {
         // convert byte[] to List<Byte>
-        List<Byte> nodeEmbedding = tuple.f3;
+        byte[] nodeEmbedding = ArrayUtils.toPrimitive(tuple.f3.toArray(new Byte[tuple.f3.size()]));
+        String nodeEmbeddingChar = Hex.encodeHexString(nodeEmbedding);
         // System.out.println(nodeEmbedding);
         RocksDB.loadLibrary();
         Options options = new Options();
@@ -57,22 +60,23 @@ public class MapToRow
                         .map(Integer::parseInt)
                         .collect(Collectors.toList());
 
-        List<List<Byte>> embeddings = new ArrayList<>();
-        embeddings.add(nodeEmbedding);
+        List<String> embeddings = new ArrayList<>();
+        embeddings.add(nodeEmbeddingChar);
 
         // query database to find the embedding of the neighbors
         for (Integer neighbor : neighborList) {
             // import NodeReader!
             Tuple3<Integer, Integer, List<Byte>> entry = NodeReader.findFeatures(neighbor, db);
             List<Byte> neighborEmbedding = entry.f2;
-
-            embeddings.add(neighborEmbedding);
+            Byte[] neighborEmbeddingB =
+                    neighborEmbedding.toArray(new Byte[neighborEmbedding.size()]);
+            byte[] neighborEmbeddingb = ArrayUtils.toPrimitive(neighborEmbeddingB);
+            embeddings.add(Hex.encodeHexString(neighborEmbeddingb));
         }
-        // System.out.println(embeddings);
 
         // flatmap embeddings
-        final List<Byte> flatEmbeddings =
-                embeddings.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
+        // final List<Byte> flatEmbeddings =
+        //        embeddings.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
 
         // System.out.println(flatEmbeddings);
         //        Row row = Row.withPositions(4);
@@ -81,6 +85,6 @@ public class MapToRow
         //        row.setField(2, tuple.f4);
         //        row.setField(3, flatEmbeddings);
         //        return row;
-        return Row.of(tuple.f0, tuple.f2, tuple.f4, flatEmbeddings);
+        return Row.of(tuple.f0, tuple.f2, tuple.f4, String.join("", embeddings));
     }
 }

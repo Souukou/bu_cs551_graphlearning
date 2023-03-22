@@ -14,6 +14,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <rocksdb.version>6.29.4.1</rocksdb.version>
+        <protobuf.version>3.16.1</protobuf.version>
     </properties>
 
     <dependencies>
@@ -64,6 +65,12 @@
               <artifactId>rocksdbjni</artifactId>
               <version>${rocksdb.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+
     </dependencies>
 
     <build>

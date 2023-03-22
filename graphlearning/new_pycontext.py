@@ -21,7 +21,6 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         # self.byte_len = int(self.pytorch_context.get_property('BYTE_LEN'))
 
     def decoding_features(self, feats_str):
-        feats_str = eval(feats_str)
         assert len(feats_str) % self.node_num == 0
         self.byte_len = len(feats_str) // self.node_num
         feat_strs = [feats_str[i * self.byte_len : (i+1) * self.byte_len] for i in range(self.node_num)]
@@ -59,25 +58,18 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         return new_data
     def parse_record(self, record):
         
-        print("#################")
-        print(record)
-
-        print("#################")
-        df = pd.read_csv(StringIO(record), names=["src", "label", "nbr", "embed"])
-
+        df = pd.read_csv(StringIO(record), names=["src", "label", "nbr", "embed"], encoding='utf8')
+        # df.to_csv('/tmp/res.csv') 
+        df['embed'] = df['embed'].apply(lambda x: bytes.fromhex(x))
         ############ For debugging only, remove this later ######################
         # print("we are reading the sample data from the file")
-        df = pd.read_csv('/opt/graphlearning/sample_data.csv')
-        self.input_types = ["None", "INT_64", "INT_64", "INT_64", "FLOAT_32"]
-        # print(df)
+        # df = pd.read_csv('/opt/graphlearning/sample_data.csv')
+        self.input_types = ["INT_64", "INT_64", "INT_64", "FLOAT_32"]
+        print(df.columns)
         ############ For debugging only, remove this later ######################
 
         tensors = []
-        for idx, key in enumerate(df.columns):
-            # print(idx, key, df[key][0])
-            if key not in ['src', 'label', 'nbr', 'embed']:
-                # print("passing!!!")
-                continue
+        for idx, key in enumerate(["src", "nbr", "label", "embed"]):
             if key == 'src':
                 if isinstance(df[key][0], np.int64):
                     cur = torch.from_numpy(np.array([df[key][0]])).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]])
