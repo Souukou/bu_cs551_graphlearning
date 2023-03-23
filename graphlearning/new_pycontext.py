@@ -21,6 +21,8 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         # self.byte_len = int(self.pytorch_context.get_property('BYTE_LEN'))
 
     def decoding_features(self, feats_str):
+        print("feats_str:", feats_str.__class__)
+        print(("length and node num",len(feats_str), self.node_num))
         assert len(feats_str) % self.node_num == 0
         self.byte_len = len(feats_str) // self.node_num
         feat_strs = [feats_str[i * self.byte_len : (i+1) * self.byte_len] for i in range(self.node_num)]
@@ -28,10 +30,13 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         feats = [np.frombuffer(feat_str, np.dtype(int)) for feat_str in feat_strs]
         return feats
     def decoding_neighbors(self, feats_str):
-        feat_str_ls = feats_str.split('-')
-        neighbor_ls = list(map(int, feat_str_ls))
-        # neighbor_ls = map(int, feats_str.split(','))
-        # print(feat_str_ls, neighbor_ls)
+        if isinstance(feats_str, np.int64):
+            neighbor_ls = [feats_str.item()]
+        else:
+            feat_str_ls = feats_str.split('-')
+            neighbor_ls = list(map(int, feat_str_ls))
+            # neighbor_ls = map(int, feats_str.split(','))
+            # print(feat_str_ls, neighbor_ls)
         self.node_num = len(neighbor_ls) + 1
         return neighbor_ls
     def decoding_single(self, feats_str):
@@ -57,9 +62,10 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         # new_data = {'x': feats, 'edge_index': new_edges, 'y': label, 'mask_all': mask_all}
         return new_data
     def parse_record(self, record):
-        
+        with open('/opt/res.txt', 'w') as f:
+          f.write(record)
         df = pd.read_csv(StringIO(record), names=["src", "label", "nbr", "embed"], encoding='utf8')
-        # df.to_csv('/tmp/res.csv') 
+        df.to_csv('/opt/res.csv') 
         df['embed'] = df['embed'].apply(lambda x: bytes.fromhex(x))
         ############ For debugging only, remove this later ######################
         # print("we are reading the sample data from the file")

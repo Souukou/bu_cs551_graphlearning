@@ -22,9 +22,9 @@ public interface NodeReader {
             System.out.println("Value not found for key: " + new String(keyByte));
         }
         int keyInt = nodeID;
-        int mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 7)).getInt();
-        int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 8, 15)).getInt();
-        byte[] embedding = Arrays.copyOfRange(value, 16, value.length);
+        int mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
+        int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
+        byte[] embedding = Arrays.copyOfRange(value, 6, value.length);
         List<Byte> embeddingList = Arrays.asList(ArrayUtils.toObject(embedding));
         Tuple3<Integer, Integer, List<Byte>> entry = new Tuple3<>(mask, label, embeddingList);
         return entry;

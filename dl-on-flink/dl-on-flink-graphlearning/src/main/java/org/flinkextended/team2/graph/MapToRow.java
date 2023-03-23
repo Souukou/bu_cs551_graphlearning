@@ -34,8 +34,8 @@ public class MapToRow
             throws RocksDBException {
         // convert byte[] to List<Byte>
         byte[] nodeEmbedding = ArrayUtils.toPrimitive(tuple.f3.toArray(new Byte[tuple.f3.size()]));
+        int length = nodeEmbedding.length;
         String nodeEmbeddingChar = Hex.encodeHexString(nodeEmbedding);
-        // System.out.println(nodeEmbedding);
         RocksDB.loadLibrary();
         Options options = new Options();
         LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
@@ -78,7 +78,6 @@ public class MapToRow
         // final List<Byte> flatEmbeddings =
         //        embeddings.stream().flatMap(l -> l.stream()).collect(Collectors.toList());
 
-        // System.out.println(flatEmbeddings);
         //        Row row = Row.withPositions(4);
         //        row.setField(0, tuple.f0);
         //        row.setField(1, tuple.f2);

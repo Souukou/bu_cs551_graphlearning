@@ -11,7 +11,7 @@ def train_step(model, optimizer, data_step, iter_num = 10):
         optimizer.zero_grad()
         out = model(new_data)
         # out = model(new_data.x, new_data.edge_index, new_data.batch)
-        loss = F.nll_loss(out, new_data.y)
+        loss = F.nll_loss(out[data_step.train_mask], new_data.y[data_step.train_mask])
         loss.backward()
         # loss_ls.append(loss.item())
         optimizer.step()
@@ -22,7 +22,7 @@ def val_step(model, data_step):
     new_data = data_step
     out = model(new_data)
     # out = model(new_data.x, new_data.edge_index, new_data.batch)
-    loss = F.nll_loss(out, new_data.y)
+    loss = F.nll_loss(out[data_step.val_mask], new_data.y[data_step.val_mask])
 
     return loss.item()
 
@@ -32,4 +32,4 @@ def infer_step(model, data_step):
     out = model(new_data)
     # out = model(new_data.x, new_data.edge_index, new_data.batch)
 
-    return out
+    return out[data_step.test_mask]

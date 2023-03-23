@@ -68,8 +68,7 @@ public class RocksDBSourceFunction
                 int label = ByteBuffer.wrap(Arrays.copyOfRange(value, 2, 6)).getInt();
                 List<Byte> embedding =
                         Arrays.asList(
-                                ArrayUtils.toObject(
-                                        Arrays.copyOfRange(value, 6, value.length + 1)));
+                                ArrayUtils.toObject(Arrays.copyOfRange(value, 6, value.length)));
                 String neighbors =
                         NeighborReader.find_neighbors(key, neighborsDB, edgesDB).stream()
                                 .map(String::valueOf)

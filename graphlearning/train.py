@@ -32,7 +32,7 @@ def train(context: Context):
     # modify this later!!! use the PyG_DataLoader
     data_loader = PyG_DataLoader(pytorch_context.get_dataset_from_flink(), batch_size=1)
 
-    model = DDP(GCN(17,3))
+    model = DDP(GCN(17,41))
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
     #where to get the epoch?
