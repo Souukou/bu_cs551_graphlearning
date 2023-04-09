@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.flinkextended</groupId>
+        <artifactId>dl-on-flink</artifactId>
+        <version>0.5.0</version>
+    </parent>
+
+    <artifactId>dl-on-flink-graphlearning</artifactId>
+    <packaging>jar</packaging>
+    <properties>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <rocksdb.version>6.29.4.1</rocksdb.version>
+        <protobuf.version>3.16.1</protobuf.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.flinkextended</groupId>
+            <artifactId>dl-on-flink-pytorch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-java_${scala.major.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-api-java-bridge_${scala.major.version}
+                </artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-clients_${scala.major.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner_${scala.major.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-python_${scala.major.version}</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-csv</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.rocksdb</groupId>
+            <artifactId>rocksdbjni</artifactId>
+            <version>${rocksdb.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <id>GraphOperators</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <finalName>GraphOperators</finalName>
+                            <transformers>
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+                                <transformer
+                                    implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>graphlearning.StreamingGraph</mainClass>
+                                </transformer>
+                            </transformers>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.scala-lang:*</exclude>
+                                    <!-- log4j -->
+                                    <exclude>org.slf4j:slf4j-log4j12</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-api</exclude>
+                                    <exclude>org.apache.logging.log4j:log4j-core</exclude>
+                                    <exclude>log4j:log4j</exclude>
+                                    <!-- flink shaded jars -->
+                                    <exclude>org.apache.flink:flink-shaded-*</exclude>
+                                    <!-- flink dependencies are provided -->
+                                    <exclude>org.apache.flink:flink-core</exclude>
+                                    <exclude>org.apache.flink:flink-annotations</exclude>
+                                    <exclude>org.apache.flink:flink-metrics-*</exclude>
+                                    <exclude>org.apache.flink:flink-hadoop-fs</exclude>
+                                    <exclude>org.apache.flink:force-shading</exclude>
+
+                                </excludes>
+                            </artifactSet>
+
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.google.common</pattern>
+                                    <shadedPattern>
+                                        org.flinkextended.flink.ml.tensorflow.shaded.com.google.common</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons</pattern>
+                                    <shadedPattern>
+                                        org.flinkextended.flink.ml.tensorflow.shaded.org.apache.commons</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

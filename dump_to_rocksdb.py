@@ -20,6 +20,10 @@ class OrderBySourceNode(rocksdb.interfaces.Comparator):
 
   def name(self):
     return "OrderBySourceNode".encode("UTF-8")
+
+import os
+if not os.path.exists('dataset-test'):
+   os.makedirs('dataset-test')
     
 dataset = torch_geometric.datasets.KarateClub()[0]
 
