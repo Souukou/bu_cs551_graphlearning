@@ -1,0 +1,14 @@
+syntax = "proto3";
+option java_package = "graphlearning";
+option java_outer_classname = "Event";
+import "google/protobuf/timestamp.proto";
+
+message Event {
+  google.protobuf.Timestamp timestamp = 1;
+  int32 source = 2;
+  int32 target = 3;
+  int32 source_label = 4;
+  int32 target_label = 5;
+  string source_data_hex = 6;
+  string target_data_hex = 7;
+}
