@@ -1,7 +1,9 @@
 package graphlearning;
-import graphlearning.protos.Event;
+
 import org.apache.flink.api.common.serialization.DeserializationSchema;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+
+import graphlearning.protos.Event;
 
 import java.io.IOException;
 

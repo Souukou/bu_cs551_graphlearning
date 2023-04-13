@@ -1,4 +1,4 @@
-package org.kafka.consumer;
+package graphlearing;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.tuple.Tuple7;
@@ -8,9 +8,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import com.google.protobuf.Timestamp;
+import graphlearning.protos.Event;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.kafka.consumer.EventProto.Event;
 
 import java.util.ArrayList;
 import java.util.Properties;

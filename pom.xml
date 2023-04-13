@@ -61,10 +61,15 @@
             <artifactId>flink-csv</artifactId>
             <version>${flink.version}</version>
         </dependency>
-        <dependency>
+        <!--        <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka-${kafka.version}_${scala.major.version}</artifactId>
             <version>1.11.6</version>
+        </dependency> -->
+        <dependency>
+          <groupId>org.apache.flink</groupId>
+          <artifactId>flink-connector-kafka</artifactId>
+          <version>1.16.0</version>
         </dependency>
         <dependency>
             <groupId>org.rocksdb</groupId>
