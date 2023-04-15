@@ -5,7 +5,6 @@ import org.apache.flink.types.Row;
 
 import graphlearning.protos.Event;
 import org.apache.commons.lang3.NotImplementedException;
-import org.rocksdb.*;
 
 public class MapToRowKafka implements MapFunction<Event, Row> {
 
@@ -24,7 +23,7 @@ public class MapToRowKafka implements MapFunction<Event, Row> {
      * - source_data_hex: (string) Byte String encoding of source embedding
      * - target_data_hex: (string) Byte String encoding of target node embedding
      */
-    public Row map(Event event) throws RocksDBException {
+    public Row map(Event event) {
         throw new NotImplementedException("This Function is yet to be implemented");
 
         return new Row();

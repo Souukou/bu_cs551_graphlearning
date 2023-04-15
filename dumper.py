@@ -7,7 +7,7 @@ import torch_geometric
 import tqdm
 import datetime
 
-from protobuf import message_pb2
+from protobuf import event_pb2 
 
 
 def build_parser():
@@ -122,7 +122,7 @@ class DumpToKafka:
         self._topic = topic
 
     def dump(self, source, target, labels, feats):
-        event = message_pb2.Event()
+        event = event_pb2.Event()
         event.timestamp.FromDatetime(datetime.datetime.now())
         event.source = source
         event.target = target
