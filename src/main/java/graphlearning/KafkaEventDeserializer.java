@@ -7,6 +7,7 @@ import graphlearning.protos.Event;
 
 import java.io.IOException;
 
+/** KafkaEventDeserializer. */
 public class KafkaEventDeserializer implements DeserializationSchema<Event> {
     @Override
     public TypeInformation<Event> getProducedType() {

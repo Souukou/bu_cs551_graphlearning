@@ -6,13 +6,15 @@ import org.apache.flink.types.Row;
 import graphlearning.protos.Event;
 import org.apache.commons.lang3.NotImplementedException;
 
+/** MapToRow. */
 public class MapToRowKafka implements MapFunction<Event, Row> {
 
-    private final String db_path;
+    private final String dbPath;
 
     public MapToRowKafka(String path) {
-        this.db_path = path;
+        this.dbPath = path;
     }
+
     /*
      * Input: Event
      * - timestamp: Current TimeStamp
