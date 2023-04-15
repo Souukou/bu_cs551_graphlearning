@@ -8,7 +8,6 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 
 import graphlearning.protos.Event;
-import org.rocksdb.*;
 
 import java.util.Properties;
 
