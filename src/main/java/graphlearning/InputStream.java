@@ -1,11 +1,16 @@
 package graphlearning;
 
+import org.apache.flink.api.common.eventtime.WatermarkStrategy;
+import org.apache.flink.connector.kafka.source.KafkaSource;
+import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 
 import graphlearning.protos.Event;
 import org.rocksdb.*;
+
+import java.util.Properties;
 
 class InputStream {
     String nodesPath = "dataset-test/nodes.db";
@@ -21,13 +26,10 @@ class InputStream {
     //
     //         return rows;
     //     }
-    DataStream<Row> getStream(StreamExecutionEnvironment env) throws Exception {
+    DataStream<Row> getStream(StreamExecutionEnvironment env) {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "rise.bu.edu:9092");
         properties.setProperty("topic.id", "test");
-
-        // set up streaming execution environment
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
         // create a Kafka consumer
         KafkaSource<Event> source =

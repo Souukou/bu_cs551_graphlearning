@@ -25,7 +25,5 @@ public class MapToRowKafka implements MapFunction<Event, Row> {
      */
     public Row map(Event event) {
         throw new NotImplementedException("This Function is yet to be implemented");
-
-        return new Row();
     }
 }
