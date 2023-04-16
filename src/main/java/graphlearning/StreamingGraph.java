@@ -60,6 +60,7 @@ public class StreamingGraph {
                                 .build());
 
         DataStream<Row> inputStream = new InputStream().getStream(env);
+        inputStream.print();
         if ("train".equals(mode)) {
             train(modelPath, epoch, statementSet, inputStream, pyScript);
         }
