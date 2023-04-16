@@ -7,8 +7,17 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 
-import graphlearning.protos.Event;
+import graphlearning.kafka.KafkaEventDeserializer;
+import graphlearning.kafka.MapEventToEdge;
+import graphlearning.kafka.protos.Event;
+import graphlearning.maps.FlatMapNodeToComputationGraph;
+import graphlearning.maps.MapComputationGraphToRow;
+import graphlearning.sampling.Sampler;
+import graphlearning.types.Edge;
+import graphlearning.types.NodeComputationGraph;
+import graphlearning.window.AggregateToList;
 
+import java.util.List;
 import java.util.Properties;
 
 class InputStream {
@@ -41,7 +50,18 @@ class InputStream {
 
         DataStream<Event> kafkaStream =
                 env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        DataStream<Row> rows = kafkaStream.map(new MapToRowKafka(nodesPath));
+        DataStream<Edge> edgeStream = kafkaStream.map(new MapEventToEdge());
+
+        DataStream<List<Edge>> windowed =
+                edgeStream.countWindowAll(10).aggregate(new AggregateToList());
+
+        DataStream<List<Integer>> sampledNodes = windowed.map(new Sampler());
+
+        DataStream<NodeComputationGraph> compGraphs =
+                sampledNodes.flatMap(new FlatMapNodeToComputationGraph());
+
+        DataStream<Row> rows = compGraphs.map(new MapComputationGraphToRow());
+
         return rows;
     }
 }
