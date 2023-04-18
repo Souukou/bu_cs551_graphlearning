@@ -60,7 +60,6 @@ public class StreamingGraph {
                                 .build());
 
         DataStream<Row> inputStream = new InputStream().getStream(env);
-        inputStream.print();
         if ("train".equals(mode)) {
             train(modelPath, epoch, statementSet, inputStream, pyScript);
         }
@@ -80,7 +79,7 @@ public class StreamingGraph {
                         .setProperty(
                                 MLConstants.CONFIG_STORAGE_TYPE, MLConstants.STORAGE_LOCAL_FILE)
                         .setProperty("model_save_path", modelPath)
-                        .setProperty("input_types", "INT_64,INT_64,STRING,STRING")
+                        .setProperty("input_types", "INT_64,STRING")
                         .build();
 
         GraphPyTorchUtils.train(statementSet, inputStream, config, epoch);
