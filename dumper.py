@@ -14,6 +14,7 @@ from protobuf import event_pb2
 def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--pretrained", required=True, type=pathlib.Path)
+    parser.add_argument("-k", "--to-kafka", action="store_true", default=False, dest="tokafka")
     parser.add_argument("-s", "--savedir", default="dataset-test")
     parser.add_argument("-t", "--topic", default="test")
     parser.add_argument("--servers", default=["localhost:9092"], nargs="+", type=str)
@@ -167,6 +168,7 @@ class DumpToKafka:
 def main(
     pretrained_graph_path,
     savedir="dataset-test",
+    tokafka=False,
     kafka_topic="test",
     bootstrap_servers=["localhost:9092"],
 ):
@@ -175,16 +177,18 @@ def main(
     pretrained_graph = pretrained_graph["pt_mask"]
     dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
 
-    graphdb = GraphDB(dataset.num_nodes, savedir)
-    kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic)
+    if not tokafka:
+      graphdb = GraphDB(dataset.num_nodes, savedir)
+    else:
+      kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic)
 
     for idx in tqdm.tqdm(range(dataset.num_edges)):
         source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
         feats = [dataset.x[source].numpy(), dataset.x[target].numpy()]
         labels = [dataset.y[source].numpy(), dataset.y[target].numpy()]
-        if pretrained_graph[source] and pretrained_graph[target]:
+        if (not tokafka) and pretrained_graph[source] and pretrained_graph[target]:
             graphdb.insert(source, target, feats, labels)
-        else:
+        elif tokafka:
             kafkadumper.dump(
                 source,
                 target,
@@ -198,6 +202,7 @@ if __name__ == "__main__":
     main(
         args.pretrained,
         args.savedir,
+        args.tokafka,
         args.topic,
         args.servers,
     )
