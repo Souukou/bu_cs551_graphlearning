@@ -97,9 +97,9 @@ class GraphDB:
         )
 
         if found:
-          if not data:
-            data = self.neighbordb.get(str(source).encode("UTF-8"))
-          data = int(data.decode("UTF-8"))
+            if not data:
+                data = self.neighbordb.get(str(source).encode("UTF-8"))
+            data = int(data.decode("UTF-8"))
         else:
             data = -1
         return data
@@ -110,21 +110,25 @@ class GraphDB:
             return
 
         size = self.get_neighborhood_size(source)
-        self.edgesdb.put(f"{source}|{size + 1}".encode("UTF-8"), str(target).encode("UTF-8"))
+        self.edgesdb.put(
+            f"{source}|{size + 1}".encode("UTF-8"), str(target).encode("UTF-8")
+        )
         self.neighbordb.put(str(source).encode("UTF-8"), str(size + 1).encode("UTF-8"))
 
         size = self.get_neighborhood_size(target)
-        self.edgesdb.put(f"{target}|{size + 1}".encode("UTF-8"), str(source).encode("UTF-8"))
+        self.edgesdb.put(
+            f"{target}|{size + 1}".encode("UTF-8"), str(source).encode("UTF-8")
+        )
         self.neighbordb.put(str(target).encode("UTF-8"), str(size + 1).encode("UTF-8"))
 
     def insert_node(self, idx, feature, label):
         assert not self._read_only
         mask = 0
         if self.nodesdb.key_may_exist(str(idx).encode("UTF-8"))[0]:
-          return
+            return
 
         if idx not in self._nodes:
-          return
+            return
 
         label = int(label).to_bytes(4, byteorder="big")
         value = label + feature.tobytes()
@@ -174,7 +178,6 @@ def main(
     graphdb = GraphDB(dataset.num_nodes, savedir)
     kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic)
 
-
     for idx in tqdm.tqdm(range(dataset.num_edges)):
         source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
         feats = [dataset.x[source].numpy(), dataset.x[target].numpy()]
@@ -188,7 +191,6 @@ def main(
                 dataset.y[[source, target]].numpy(),
                 dataset.x[[source, target]].numpy(),
             )
-
 
 
 if __name__ == "__main__":
