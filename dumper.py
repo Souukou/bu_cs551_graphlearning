@@ -176,6 +176,7 @@ def main(
     pretrained_graph = np.load(str(pretrained_graph_path), allow_pickle=True)[()]
     pretrained_graph = pretrained_graph["pt_mask"]
     dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
+    os.remove("/tmp/reddit/raw/reddit.zip")
 
     if not tokafka:
       graphdb = GraphDB(dataset.num_nodes, savedir)
