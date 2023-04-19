@@ -4,8 +4,6 @@ import org.apache.flink.api.common.functions.MapFunction;
 
 import graphlearning.kafka.protos.Event;
 import graphlearning.types.Edge;
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -15,8 +13,8 @@ public class MapEventToEdge implements MapFunction<Event, Edge> {
 
     @Override
     public Edge map(Event event) throws Exception {
-        byte[] sourceDataBytes = decodeHex(event.getSourceDataHex());
-        byte[] targetDataBytes = decodeHex(event.getTargetDataHex());
+        byte[] sourceDataBytes = event.getSourceData().toByteArray();
+        byte[] targetDataBytes = event.getTargetData().toByteArray();
 
         ArrayList<Byte> sourceDataList = byteArrayToArrayList(sourceDataBytes);
         ArrayList<Byte> targetDataList = byteArrayToArrayList(targetDataBytes);
@@ -31,10 +29,6 @@ public class MapEventToEdge implements MapFunction<Event, Edge> {
                         .timestamp(event.getTimestamp().toString())
                         .build();
         return edge;
-    }
-
-    private static byte[] decodeHex(String hexString) throws DecoderException {
-        return Hex.decodeHex(hexString.toCharArray());
     }
 
     private static ArrayList<Byte> byteArrayToArrayList(byte[] byteArray) {
