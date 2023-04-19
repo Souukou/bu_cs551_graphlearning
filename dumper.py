@@ -154,8 +154,8 @@ class DumpToKafka:
         event.target = target
         event.source_label = labels[0]
         event.target_label = labels[1]
-        event.source_data_hex = feats[0].tobytes().hex()
-        event.target_data_hex = feats[1].tobytes().hex()
+        event.source_data = feats[0].tobytes()
+        event.target_data = feats[1].tobytes()
 
         self.producer.send(self._topic, value=event)
 
@@ -176,8 +176,6 @@ def main(
 
 
     for idx in tqdm.tqdm(range(dataset.num_edges)):
-        #        if not dataset.val_mask[source] or not dataset.test_mask[source]:
-        #            continue
         source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
         feats = [dataset.x[source].numpy(), dataset.x[target].numpy()]
         labels = [dataset.y[source].numpy(), dataset.y[target].numpy()]
@@ -191,10 +189,6 @@ def main(
                 dataset.x[[source, target]].numpy(),
             )
 
-
-#    if dump_to_rocksdb:
-#        for node in graphdb.disconnected_nodes_so_far():
-#            graphdb.insert_node(node, dataset.x[node].numpy(), dataset.y[node].numpy())
 
 
 if __name__ == "__main__":
