@@ -1,41 +1,23 @@
 import argparse
+import datetime
+import pathlib
 
 import kafka
 import numpy as np
 import rocksdb
 import torch_geometric
 import tqdm
-import datetime
 
-from protobuf import event_pb2 
+from protobuf import event_pb2
 
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-k",
-        "--dump-to-kafka",
-        default=False,
-        action="store_true",
-        dest="dump_to_kafka",
-    )
-    parser.add_argument(
-        "-r",
-        "--dump-to-rocksdb",
-        default=False,
-        action="store_true",
-        dest="dump_to_rocksdb",
-    )
+    parser.add_argument("-p", "--pretrained", required=True, type=pathlib.Path)
     parser.add_argument("-s", "--savedir", default="dataset-test")
     parser.add_argument("-t", "--topic", default="test")
     parser.add_argument("--servers", default=["localhost:9092"], nargs="+", type=str)
     return parser
-
-
-# Type Labels
-# 0 -> Train
-# 1 -> Val
-# 2 -> Test
 
 
 class OrderBySourceNode(rocksdb.interfaces.Comparator):
@@ -53,13 +35,17 @@ class OrderBySourceNode(rocksdb.interfaces.Comparator):
 
 
 class GraphDB:
-    def __init__(self, num_nodes, read_only=False):
+    def __init__(self, num_nodes, savedir, read_only=False):
         self._read_only = read_only
         opts = GraphDB.get_options()
-        self.nodesdb = rocksdb.DB(f"{savedir}/nodes.db", opts, read_only=read_only)
+        path = pathlib.Path(f"{savedir}/nodes.db")
+        path.mkdir(exist_ok=True, parents=True)
+        self.nodesdb = rocksdb.DB(str(path), opts, read_only=read_only)
 
         opts = GraphDB.get_options()
-        self.edgesdb = rocksdb.DB(f"{savedir}/edges.db", opts, read_only=read_only)
+        path = pathlib.Path(f"{savedir}/edges.db")
+        path.mkdir(exist_ok=True, parents=True)
+        self.edgesdb = rocksdb.DB(str(path), opts, read_only=read_only)
 
         opts = GraphDB.get_options()
         self.neighbordb = rocksdb.DB(
@@ -85,27 +71,67 @@ class GraphDB:
     def disconnected_nodes_so_far(self):
         return self._nodes
 
+    def edge_exists(self, source, target):
+        key = f"{source}|0".encode("UTF-8")
+        if not self.edgesdb.key_may_exist(key)[0]:
+            return False
+        iterator = self.edgesdb.iteritems()
+        iterator.seek(key)
+        neighbors = set()
+        s = t = -1
+        for k, v in iterator:
+            s = int(k.decode("UTF-8").split("|")[0])
+            t = int(v.decode("UTF-8"))
+            if s != source:
+                break
+            neighbors.add((s, t))
+            neighbors.add((t, s))
+        if (source, target) in neighbors or (target, source) in neighbors:
+            return True
+
+        return False
+
+    def get_neighborhood_size(self, source):
+        found, data = self.neighbordb.key_may_exist(
+            str(source).encode("UTF-8"), fetch=True
+        )
+
+        if found:
+          if not data:
+            data = self.neighbordb.get(str(source).encode("UTF-8"))
+          data = int(data.decode("UTF-8"))
+        else:
+            data = -1
+        return data
+
     def insert_edge(self, source, target):
         assert not self._read_only
-        key = f"{source}|{target}".encode("UTF-8")
-        self.neighbordb.put(str(source).encode("UTF-8"), key)
-        self.edgesdb.put(key, b"\x01")
+        if self.edge_exists(source, target):
+            return
 
-        key = f"{target}|{source}".encode("UTF-8")
-        self.neighbordb.put(str(target).encode("UTF-8"), key)
-        self.edgesdb.put(key, b"\x01")
+        size = self.get_neighborhood_size(source)
+        self.edgesdb.put(f"{source}|{size + 1}".encode("UTF-8"), str(target).encode("UTF-8"))
+        self.neighbordb.put(str(source).encode("UTF-8"), str(size + 1).encode("UTF-8"))
+
+        size = self.get_neighborhood_size(target)
+        self.edgesdb.put(f"{target}|{size + 1}".encode("UTF-8"), str(source).encode("UTF-8"))
+        self.neighbordb.put(str(target).encode("UTF-8"), str(size + 1).encode("UTF-8"))
 
     def insert_node(self, idx, feature, label):
         assert not self._read_only
         mask = 0
-        value = mask.to_bytes(2, byteorder="big") + int(label).to_bytes(
-            4, byteorder="big"
-        )
-        value = value + feature.tobytes()
+        if self.nodesdb.key_may_exist(str(idx).encode("UTF-8"))[0]:
+          return
+
+        if idx not in self._nodes:
+          return
+
+        label = int(label).to_bytes(4, byteorder="big")
+        value = label + feature.tobytes()
         self.nodesdb.put(str(idx).encode("UTF-8"), value)
         self._nodes.remove(idx)
 
-    def insert(source, target, features, labels):
+    def insert(self, source, target, features, labels):
         source_feat, target_feat = features
         source_label, target_label = labels
 
@@ -135,28 +161,29 @@ class DumpToKafka:
 
 
 def main(
-    dump_to_kafka=True,
-    dump_to_rocksdb=True,
+    pretrained_graph_path,
     savedir="dataset-test",
     kafka_topic="test",
     bootstrap_servers=["localhost:9092"],
 ):
+    assert pretrained_graph_path.exists()
+    pretrained_graph = np.load(str(pretrained_graph_path), allow_pickle=True)[()]
+    pretrained_graph = pretrained_graph["pt_mask"]
     dataset = torch_geometric.datasets.KarateClub()[0]
 
-    if dump_to_rocksdb:
-        graphdb = GraphDB(dataset.num_nodes)
-    if dump_to_kafka:
-        kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic)
+    graphdb = GraphDB(dataset.num_nodes, savedir)
+    kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic)
+
 
     for idx in tqdm.tqdm(range(dataset.num_edges)):
-#        if not dataset.val_mask[source] or not dataset.test_mask[source]:
-#            continue
+        #        if not dataset.val_mask[source] or not dataset.test_mask[source]:
+        #            continue
         source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
         feats = [dataset.x[source].numpy(), dataset.x[target].numpy()]
         labels = [dataset.y[source].numpy(), dataset.y[target].numpy()]
-        if dump_to_rocksdb:
+        if pretrained_graph[source] and pretrained_graph[target]:
             graphdb.insert(source, target, feats, labels)
-        if dump_to_kafka:
+        else:
             kafkadumper.dump(
                 source,
                 target,
@@ -164,13 +191,17 @@ def main(
                 dataset.x[[source, target]].numpy(),
             )
 
-    if dump_to_rocksdb:
-        for node in graphdb.disconnected_nodes_so_far():
-            graphdb.insert_node(node, dataset.x[node].numpy(), dataset.y[node].numpy())
+
+#    if dump_to_rocksdb:
+#        for node in graphdb.disconnected_nodes_so_far():
+#            graphdb.insert_node(node, dataset.x[node].numpy(), dataset.y[node].numpy())
 
 
 if __name__ == "__main__":
     args, _ = build_parser().parse_known_args()
     main(
-        args.dump_to_kafka, args.dump_to_rocksdb, args.savedir, args.topic, args.servers
+        args.pretrained,
+        args.savedir,
+        args.topic,
+        args.servers,
     )

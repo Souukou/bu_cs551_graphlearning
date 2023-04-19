@@ -11,6 +11,6 @@ message Event {
   int32 target = 3;
   int32 source_label = 4;
   int32 target_label = 5;
-  string source_data_hex = 6;
-  string target_data_hex = 7;
+  bytes source_data = 6;
+  bytes target_data = 7;
 }
