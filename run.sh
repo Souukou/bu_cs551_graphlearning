@@ -4,7 +4,7 @@ python dump_to_rocksdb.py
 
 echo "Compiling Protobufs"
 JAVA_BASE="src/main/java/graphlearning"
-protoc -I protobuf/proto --python_out=protobuf/ --java_out="${JAVA_BASE}/" protobuf/proto/message.proto
+protoc -I protobuf/proto --python_out=protobuf/ --java_out="${JAVA_BASE}/" protobuf/proto/event.proto
 
 echo "Building..."
 mvn -DskipTests -Drat.skip=true -Dcheckstyle.skip install
