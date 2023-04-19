@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV M2_HOME "/apache-maven-3.8.8"
 ENV FLINK_HOME "/flink-1.14.4"
 ENV KAFKA_HOME "/kafka_2.12-0.11.0.0"
-ENV PATH "${PATH}:${M2_HOME}/bin:${FLINK_HOME}/bin:${KAFKA_HOME}/bin:{$HOME}/.local/bin"
+ENV PATH "${PATH}:${M2_HOME}/bin:${FLINK_HOME}/bin:${KAFKA_HOME}/bin:${HOME}/.local/bin"
 RUN apt-get update
 RUN apt-get install -y wget curl less cmake
 RUN apt-get install -y software-properties-common build-essential git
