@@ -1,0 +1,28 @@
+import numpy as np
+import json
+import argparse
+import tqdm
+
+
+def build_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--numpy", "-n", dest="npfile", required=True)
+    parser.add_argument("--json", "-j", dest="jsonfile", required=True)
+    return parser
+
+
+def main(argv):
+    dictionary = np.load(argv.npfile, allow_pickle=True)[()]
+
+    dictionary["pt_nodes"] = []
+
+    for i in tqdm.tqdm(range(len(dictionary["pt_mask"]))):
+        if dictionary["pt_mask"][i]:
+            dictionary["pt_nodes"].append(i)
+
+    del dictionary["pt_mask"], dictionary["pt_edges"]
+
+
+if __name__ == "__main__":
+    argv, _ = build_parser().parse_known_args()
+    main(argv)
