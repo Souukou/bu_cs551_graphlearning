@@ -22,6 +22,9 @@ def main(argv):
 
     del dictionary["pt_mask"], dictionary["pt_edges"]
 
+    with open(argv.jsonfile, 'w') as f:
+      json.dump(dictionary, f)
+
 
 if __name__ == "__main__":
     argv, _ = build_parser().parse_known_args()
