@@ -3,6 +3,7 @@ package graphlearning;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
+import graphlearning.rocksdb.NeighborReader;
 import org.apache.commons.lang3.ArrayUtils;
 import org.rocksdb.BlockBasedTableConfig;
 import org.rocksdb.BloomFilter;
@@ -24,7 +25,8 @@ import java.util.stream.Collectors;
  * with comma seperated")
  */
 public class RocksDBSourceFunction
-        extends RichParallelSourceFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>> {
+        extends RichParallelSourceFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>>
+        implements NeighborReader {
 
     private volatile boolean isRunning = true;
     private final String nodesPath;
@@ -67,7 +69,7 @@ public class RocksDBSourceFunction
             RocksIterator iterator = nodesDB.newIterator();
             iterator.seekToFirst();
             while (isRunning && iterator.isValid()) {
-                System.out.println("Rocks Iter");
+                // System.out.println("Rocks Iter");
                 int key = Integer.parseInt(new String(iterator.key(), StandardCharsets.UTF_8));
                 byte[] value = iterator.value();
                 short mask = ByteBuffer.wrap(Arrays.copyOfRange(value, 0, 2)).getShort();
@@ -76,7 +78,7 @@ public class RocksDBSourceFunction
                         Arrays.asList(
                                 ArrayUtils.toObject(Arrays.copyOfRange(value, 6, value.length)));
                 String neighbors =
-                        NeighborReader.find_neighbors(key, neighborsDB, edgesDB).stream()
+                        findNeighbor(key, edgesDB).stream()
                                 .map(String::valueOf)
                                 .collect(Collectors.joining("-"));
                 synchronized (ctx.getCheckpointLock()) {
