@@ -5,6 +5,7 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.types.Row;
 
+import graphlearning.rocksdb.NodeReader;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
 import org.rocksdb.BlockBasedTableConfig;
@@ -21,7 +22,8 @@ import java.util.stream.Stream;
 
 /** MapToRow. */
 public class MapToRow
-        implements MapFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>, Row> {
+        implements MapFunction<Tuple5<Integer, Short, Integer, List<Byte>, String>, Row>,
+                NodeReader {
 
     private final String dbPath;
 
@@ -73,12 +75,8 @@ public class MapToRow
         // query database to find the embedding of the neighbors
         for (Integer neighbor : neighborList) {
             // import NodeReader!
-            Tuple3<Integer, Integer, List<Byte>> entry = NodeReader.findFeatures(neighbor, db);
-            List<Byte> neighborEmbedding = entry.f2;
-            Byte[] neighborEmbeddingB =
-                    neighborEmbedding.toArray(new Byte[neighborEmbedding.size()]);
-            byte[] neighborEmbeddingb = ArrayUtils.toPrimitive(neighborEmbeddingB);
-            embeddings.add(Hex.encodeHexString(neighborEmbeddingb));
+            Tuple3<Integer, Integer, String> entry = findFeatures(neighbor, db);
+            embeddings.add(entry.f2);
         }
 
         // flatmap embeddings
