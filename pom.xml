@@ -178,6 +178,10 @@
                                 <outputTarget>
                                     <type>java</type>
                                 </outputTarget>
+                                <outputTarget>
+                                  <type>python</type>
+                                  <outputDirectory>${project.build.directory}/../protobuf</outputDirectory>
+                                </outputTarget>
                             </outputTargets>
                         </configuration>
                     </execution>
