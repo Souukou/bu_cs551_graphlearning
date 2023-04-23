@@ -21,6 +21,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.flinkextended</groupId>
             <artifactId>dl-on-flink-pytorch</artifactId>
             <version>${project.version}</version>
@@ -92,7 +98,12 @@
           <version>1.18.26</version>
           <scope>provided</scope>
         </dependency>
-
+        <dependency>
+          <groupId>org.projectlombok</groupId>
+          <artifactId>lombok</artifactId>
+          <version>1.18.26</version>
+          <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -152,6 +163,7 @@
                                         org.flinkextended.flink.ml.tensorflow.shaded.org.apache.commons</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
                     </execution>
                 </executions>

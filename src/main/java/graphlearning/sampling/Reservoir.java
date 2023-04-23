@@ -4,19 +4,30 @@ import graphlearning.helper.RandomNumbers;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
+/** Implementation of Reservoir Sampling Algorithm. */
 public class Reservoir implements Serializable {
     /**
      * Implementation of Reservoir Sampling Algorithm R. See
      * https://en.wikipedia.org/wiki/Reservoir_sampling#Simple:_Algorithm_R
      */
-    private Integer timestamp = 0;
+    private Integer timestamp;
 
-    @Getter private Integer size = 10;
-    private Random rand = new Random();
-    private int[] reservoir = new int[size];
+    @Getter private Integer size;
+    private Random rand;
+    private int[] reservoir;
+
+    public Reservoir(Integer size) {
+        timestamp = 0;
+        this.size = size;
+        rand = new Random();
+        reservoir = new int[size];
+    }
 
     public void update(Integer newNode) {
         if (timestamp < size) {

@@ -1,7 +1,12 @@
 package graphlearning.helper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
+/** Get a list of random numbers within (min, max). */
 public class RandomNumbers {
     private static Random random = new Random();
 
