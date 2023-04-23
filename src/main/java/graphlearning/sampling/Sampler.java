@@ -37,7 +37,8 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
             Reader reader = new FileReader(initialNodesPath);
             oldNodes = gson.fromJson(reader, Nodes.class).getPtNodes();
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            System.out.println("No initial nodes provided. Using empty reservoir.");
             oldNodes = new ArrayList<>();
         }
     }
