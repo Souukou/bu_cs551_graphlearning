@@ -22,6 +22,10 @@ public class Reservoir implements Serializable {
     private Random rand;
     private int[] reservoir;
 
+    public Reservoir() {
+        this(10);
+    }
+
     public Reservoir(Integer size) {
         timestamp = 0;
         this.size = size;
