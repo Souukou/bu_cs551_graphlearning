@@ -59,7 +59,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
                 .forEach(node -> nodeSet.add(node));
         List<Integer> allNodes = new ArrayList<>();
         allNodes.addAll(nodeSet);
-        System.out.println("all nodes: " + allNodes);
+        // System.out.println("all nodes: " + allNodes);
         // find new nodes (requires db)
         List<Integer> newNodes =
                 allNodes.stream().filter(node -> newNode(node)).collect(Collectors.toList());
