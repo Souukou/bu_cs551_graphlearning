@@ -4,7 +4,9 @@ import graphlearning.helper.RandomNumbers;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /** Reservoir. */

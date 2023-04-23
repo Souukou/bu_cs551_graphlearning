@@ -56,7 +56,7 @@ class AggregateToListTest {
                         .targetEmbedding(new ArrayList<>())
                         .timestamp("timestamp")
                         .build();
-        ;
+
         List<Edge> acc = Arrays.asList(edge);
 
         List<Edge> result = aggregateToList.getResult(acc);

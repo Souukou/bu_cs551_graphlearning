@@ -9,7 +9,11 @@ import graphlearning.types.Edge;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Sampler. */
@@ -31,7 +35,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         Gson gson = new Gson();
         try {
             Reader reader = new FileReader(initialNodesPath);
-            oldNodes = gson.fromJson(reader, Nodes.class).getPt_nodes();
+            oldNodes = gson.fromJson(reader, Nodes.class).getPtNodes();
         } catch (IOException e) {
             e.printStackTrace();
             oldNodes = new ArrayList<>();
