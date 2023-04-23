@@ -1,6 +1,5 @@
-package graphlearning;
+package graphlearning.rocksdb;
 
-import graphlearning.rocksdb.RocksDBReader;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -15,12 +14,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 
-/** Test RocksDB. */
-public class TestRocksDB {
+/** This test base is used by other test to set up a simple RocksDB for test. */
+public abstract class TestRocksDBSetup1 {
     static {
         RocksDB.loadLibrary();
     }
@@ -43,8 +39,6 @@ public class TestRocksDB {
         }
     }
 
-    // This part build a sample RocksDB following the our schema design for all the unit test in
-    // this class
     @BeforeAll
     static void setupRocksDB() {
         System.out.println("Setup RocksDB for test");
@@ -174,128 +168,5 @@ public class TestRocksDB {
             Assertions.assertTrue(false);
         }
         options.close();
-    }
-
-    @Test
-    void testGetKNeighborId1() {
-        RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
-        ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborId(3, 1, 10);
-
-        ArrayList<ArrayList<Integer>> expectedNeighbors = new ArrayList<ArrayList<Integer>>();
-
-        expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, 13)));
-        expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, 15)));
-        expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, 17)));
-        expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, 19)));
-        expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, 21)));
-
-        HashSet<ArrayList<Integer>> neighborHashSet = new HashSet<ArrayList<Integer>>(neighbors);
-        HashSet<ArrayList<Integer>> expectedNeighborHashSet =
-                new HashSet<ArrayList<Integer>>(expectedNeighbors);
-
-        Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
-    }
-
-    @Test
-    void testGetKNeighborId2() {
-        RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
-        ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborId(3, 2, 10);
-
-        ArrayList<ArrayList<Integer>> expectedNeighbors = new ArrayList<ArrayList<Integer>>();
-
-        for (int j = 13; j < 23; j += 2) {
-            expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, j)));
-        }
-
-        for (int i = 13; i <= 21; i += 2) {
-            for (int j = i + 10; j < i + 20; j += 2) {
-                expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(i, j)));
-            }
-        }
-
-        HashSet<ArrayList<Integer>> neighborHashSet = new HashSet<ArrayList<Integer>>(neighbors);
-        HashSet<ArrayList<Integer>> expectedNeighborHashSet =
-                new HashSet<ArrayList<Integer>>(expectedNeighbors);
-
-        Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
-    }
-
-    @Test
-    void testGetKNeighborId3() {
-        RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
-        ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborId(3, 3, 10);
-
-        ArrayList<ArrayList<Integer>> expectedNeighbors = new ArrayList<ArrayList<Integer>>();
-
-        for (int j = 13; j <= 21; j += 2) {
-            expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, j)));
-        }
-
-        for (int i = 13; i <= 21; i += 2) {
-            for (int j = i + 10; j < i + 20; j += 2) {
-                expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(i, j)));
-            }
-        }
-
-        for (int i = 23; i <= 39; i += 2) {
-            for (int j = i + 10; j < i + 20; j += 2) {
-                expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(i, j)));
-            }
-        }
-
-        HashSet<ArrayList<Integer>> neighborHashSet = new HashSet<ArrayList<Integer>>(neighbors);
-        HashSet<ArrayList<Integer>> expectedNeighborHashSet =
-                new HashSet<ArrayList<Integer>>(expectedNeighbors);
-
-        Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
-    }
-
-    @Test
-    void testGetKNeighborId4() {
-        // test with limit neighbor size
-        RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
-        ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborId(3, 3, 3);
-
-        ArrayList<ArrayList<Integer>> expectedNeighbors = new ArrayList<ArrayList<Integer>>();
-
-        for (int j = 13; j <= 21; j += 2) {
-            expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(3, j)));
-        }
-
-        for (int i = 13; i <= 21; i += 2) {
-            for (int j = i + 10; j < i + 20; j += 2) {
-                expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(i, j)));
-            }
-        }
-
-        for (int i = 23; i <= 39; i += 2) {
-            for (int j = i + 10; j < i + 20; j += 2) {
-                expectedNeighbors.add(new ArrayList<Integer>(Arrays.asList(i, j)));
-            }
-        }
-
-        HashSet<ArrayList<Integer>> neighborHashSet = new HashSet<ArrayList<Integer>>(neighbors);
-        HashSet<ArrayList<Integer>> expectedNeighborHashSet =
-                new HashSet<ArrayList<Integer>>(expectedNeighbors);
-
-        // System.out.println(expectedNeighborHashSet.size() + " " + neighborHashSet.size());
-        Assertions.assertTrue(expectedNeighborHashSet.size() > neighborHashSet.size());
-        Assertions.assertTrue(expectedNeighborHashSet.containsAll(neighborHashSet));
-    }
-
-    @Test
-    void testRandomSampleFromWholeDB() {
-        RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
-        ArrayList<Integer> sample = rocksDBReader.getRandomSample(10);
-
-        HashSet<Integer> sampleSet = new HashSet<Integer>(sample);
-
-        HashSet<Integer> allPossibleNode = new HashSet<Integer>();
-        for (int i = 1; i <= 90; i++) {
-            allPossibleNode.add(i);
-        }
-        // System.out.println(sampleSet);
-        Assertions.assertTrue(allPossibleNode.containsAll(sampleSet));
-        Assertions.assertEquals(sampleSet.size(), 10);
     }
 }
