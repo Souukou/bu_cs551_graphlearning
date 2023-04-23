@@ -46,19 +46,6 @@ public class StreamingGraph {
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         final StreamStatementSet statementSet = tEnv.createStatementSet();
 
-        final Table sample =
-                tEnv.from(
-                        TableDescriptor.forConnector("datagen")
-                                .schema(
-                                        Schema.newBuilder()
-                                                .column("source", DataTypes.STRING())
-                                                .column("neighbor", DataTypes.STRING())
-                                                .column("label", DataTypes.STRING())
-                                                .column("vectors", DataTypes.STRING())
-                                                .build())
-                                .option("number-of-rows", String.valueOf(sampleCount))
-                                .build());
-
         DataStream<Row> inputStream = new InputStream().getStream(env);
         if ("train".equals(mode)) {
             train(modelPath, epoch, statementSet, inputStream, pyScript);
