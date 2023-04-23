@@ -14,7 +14,7 @@ import java.util.List;
  * RocksDB read only interface to pull up node neighbors and features from RocksDB. By default, it
  * will read from the dataset-test/node.db and dataset-test/edge.db
  */
-public class RocksDBReader implements NodeReader, NeighborReader {
+public class RocksDBReader {
     private String nodeDbPath;
     private String edgeDbPath;
 
@@ -64,26 +64,54 @@ public class RocksDBReader implements NodeReader, NeighborReader {
      * @return {@code ArrayList&lt;ArrayList&lt;ArrayList&lt;Integer&gt;&gt;&gt;} contains a list of
      *     neighbors' id.
      */
-    public ArrayList<ArrayList<Integer>> getKNeighborId(
+    public ArrayList<ArrayList<Integer>> getKNeighborIdPlain(
             Integer nodeId, int k, int maxNumOfNeighbors) {
         HashSet<ArrayList<Integer>> kNeighbors = new HashSet<ArrayList<Integer>>();
         ArrayList<Integer> thisLevelNodeIds = new ArrayList<Integer>(Arrays.asList(nodeId));
         while (k != 0) {
-            ArrayList<Integer> thisLevelNeighbors = new ArrayList<Integer>();
+            HashSet<Integer> thisLevelNeighbors = new HashSet<Integer>();
             for (Integer node : thisLevelNodeIds) {
 
-                ArrayList<Integer> neighbors = findNeighbor(node, edgeDb);
-                if (neighbors.size() > maxNumOfNeighbors) {
-                    Collections.shuffle(neighbors);
-                    List<Integer> sublist = neighbors.subList(0, maxNumOfNeighbors);
-                    neighbors = new ArrayList<Integer>(sublist);
-                }
+                ArrayList<Integer> neighbors =
+                        NeighborReader.findNeighbor(node, edgeDb, maxNumOfNeighbors);
+
                 for (Integer neighbor : neighbors) {
                     kNeighbors.add(new ArrayList<Integer>(Arrays.asList(node, neighbor)));
                 }
                 thisLevelNeighbors.addAll(neighbors);
             }
-            thisLevelNodeIds = thisLevelNeighbors;
+            thisLevelNodeIds = new ArrayList<Integer>(thisLevelNeighbors);
+            k--;
+        }
+        return new ArrayList<ArrayList<Integer>>(kNeighbors);
+    }
+
+    /**
+     * Query the node's K neighbors ID from edge.db.
+     *
+     * @param nodeId query node's id
+     * @param k {@code int} the number of levels of neighbors to be queried.
+     * @param maxNumOfNeighbors {@code int} the maximum number of neighbors for each node.
+     * @return {@code ArrayList&lt;ArrayList&lt;ArrayList&lt;Integer&gt;&gt;&gt;} contains a list of
+     *     neighbors' id.
+     */
+    public ArrayList<ArrayList<Integer>> getKNeighborIdReservoir(
+            Integer nodeId, int k, int maxNumOfNeighbors) {
+        HashSet<ArrayList<Integer>> kNeighbors = new HashSet<ArrayList<Integer>>();
+        ArrayList<Integer> thisLevelNodeIds = new ArrayList<Integer>(Arrays.asList(nodeId));
+        while (k != 0) {
+            HashSet<Integer> thisLevelNeighbors = new HashSet<Integer>();
+            for (Integer node : thisLevelNodeIds) {
+
+                ArrayList<Integer> neighbors =
+                        NeighborReader.findNeighborReservoir(node, edgeDb, maxNumOfNeighbors);
+
+                for (Integer neighbor : neighbors) {
+                    kNeighbors.add(new ArrayList<Integer>(Arrays.asList(node, neighbor)));
+                }
+                thisLevelNeighbors.addAll(neighbors);
+            }
+            thisLevelNodeIds = new ArrayList<Integer>(thisLevelNeighbors);
             k--;
         }
         return new ArrayList<ArrayList<Integer>>(kNeighbors);

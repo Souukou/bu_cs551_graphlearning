@@ -1,6 +1,5 @@
-package graphlearning;
+package graphlearning.rocksdb;
 
-import graphlearning.rocksdb.RocksDBWriter;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;

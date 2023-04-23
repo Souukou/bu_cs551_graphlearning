@@ -18,7 +18,7 @@ import java.util.ArrayList;
  * RocksDB writer interface to insert nodes and edges to RocksDB. By default, it will read/write
  * from the dataset-test/node.db, dataset-test/edge.db and dataset-test/neighbor.db
  */
-public class RocksDBWriter implements NodeReader, NeighborReader {
+public class RocksDBWriter {
     private String nodeDbPath;
     private String edgeDbPath;
     private String neighborPath;
@@ -121,7 +121,7 @@ public class RocksDBWriter implements NodeReader, NeighborReader {
      * @param feature query node's embedding bytes
      */
     public void insertNode(Integer nodeId, byte[] feature) {
-        Tuple3<Integer, Integer, String> nodeFeatures = findFeatures(nodeId, nodeDb);
+        Tuple3<Integer, Integer, String> nodeFeatures = NodeReader.findFeatures(nodeId, nodeDb);
 
         // if this node feature is not null, the node already exist, return directly.
         if (nodeFeatures != null) {
@@ -145,7 +145,7 @@ public class RocksDBWriter implements NodeReader, NeighborReader {
      * @param dstId query edge's destination node id
      */
     public void insertEdge(Integer srcId, Integer dstId) {
-        ArrayList<Integer> neighbors = findNeighbor(srcId, edgeDb);
+        ArrayList<Integer> neighbors = NeighborReader.findNeighbor(srcId, edgeDb, -1);
         // if the edge already exist, return directly.
         if (neighbors != null && neighbors.contains(dstId)) {
             return;
