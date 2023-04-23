@@ -55,7 +55,7 @@ class InputStream {
         DataStream<List<Edge>> windowed =
                 edgeStream.countWindowAll(10).aggregate(new AggregateToList());
 
-        DataStream<List<Integer>> sampledNodes = windowed.map(new Sampler());
+        DataStream<List<Integer>> sampledNodes = windowed.map(new Sampler(10, ""));
 
         DataStream<NodeComputationGraph> compGraphs =
                 sampledNodes.flatMap(new FlatMapNodeToComputationGraph());

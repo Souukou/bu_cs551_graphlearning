@@ -212,3 +212,5 @@ dataset-test
 flink-*
 
 dataset-ut
+
+src/main/java/graphlearning/kafka/protos

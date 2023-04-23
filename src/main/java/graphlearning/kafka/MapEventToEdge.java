@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/** MapEventToEdge. */
 public class MapEventToEdge implements MapFunction<Event, Edge> {
 
     @Override
