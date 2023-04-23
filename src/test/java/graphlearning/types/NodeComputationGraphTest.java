@@ -9,6 +9,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** NodeComputationGraphTest. */
 class NodeComputationGraphTest {
     private NodeComputationGraph nodeComputationGraph;
     private List<Byte> byteListEmbedding;

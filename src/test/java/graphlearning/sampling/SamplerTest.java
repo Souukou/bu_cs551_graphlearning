@@ -9,6 +9,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** SamplerTest. */
 class SamplerTest {
     private Sampler sampler;
 

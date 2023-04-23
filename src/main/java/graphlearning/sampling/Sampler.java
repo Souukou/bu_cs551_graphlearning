@@ -12,6 +12,7 @@ import java.io.Reader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/** Sampler. */
 public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
 
     /**

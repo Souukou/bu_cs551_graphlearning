@@ -8,6 +8,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** ReservoirTest. */
 class ReservoirTest {
     private Reservoir reservoir;
 

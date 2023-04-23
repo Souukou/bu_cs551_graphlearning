@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import java.util.Arrays;
 import java.util.List;
 
+/** MapInputToGraphChange. */
 public class MapInputToGraphChange implements MapFunction<WikipediaEditEvent, Edge> {
     @Override
     public Edge map(WikipediaEditEvent e) {

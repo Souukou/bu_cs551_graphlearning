@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.util.List;
 
+/** Edge. */
 @Getter
 @Builder
 public class Edge {

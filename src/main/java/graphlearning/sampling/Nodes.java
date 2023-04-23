@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import java.util.List;
 
+/** Nodes. */
 @Getter
 public class Nodes {
     List<Integer> pt_nodes;

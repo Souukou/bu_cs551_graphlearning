@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** EdgeTest. */
 class EdgeTest {
     private Edge edge;
 

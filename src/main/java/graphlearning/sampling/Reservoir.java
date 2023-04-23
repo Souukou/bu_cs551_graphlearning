@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/** Reservoir. */
 public class Reservoir implements Serializable {
     /**
      * Implementation of Reservoir Sampling Algorithm R. See
