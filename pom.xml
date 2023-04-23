@@ -19,6 +19,19 @@
     </properties>
 
     <dependencies>
+    	<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-kafka -->
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-kafka</artifactId>
+			<version>1.16.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.flink/flink-connector-wikiedits -->
+		<dependency>
+			<groupId>org.apache.flink</groupId>
+			<artifactId>flink-connector-wikiedits</artifactId>
+			<version>1.16.0</version>
+		</dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -82,6 +95,12 @@
           <version>1.18.26</version>
           <scope>provided</scope>
         </dependency>
+        <dependency>
+			<groupId>org.easymock</groupId>
+			<artifactId>easymock</artifactId>
+			<version>5.1.0</version>
+			<scope>test</scope>
+		</dependency>
     </dependencies>
 
     <build>
