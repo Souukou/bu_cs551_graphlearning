@@ -1,9 +1,13 @@
 package graphlearning.sampling;
 
 import graphlearning.types.Edge;
+import org.apache.commons.io.FileUtils;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,10 +25,41 @@ class SamplerTest {
         sampler = new Sampler(numOfSamples, initialNodesPath);
     }
 
+    @AfterEach
+    void tearDown() {
+        sampler.finalize();
+        // delete the dataset-test directory
+        try {
+            FileUtils.deleteDirectory(new File("dataset-test"));
+        } catch (Exception e) {
+            System.err.println("Error when delete RocksDB: " + e.getMessage());
+            e.printStackTrace();
+            Assertions.assertTrue(false);
+        }
+    }
+
     @Test
     void map() {
-        Edge edge1 = Edge.builder().sourceNode(42).targetNode(17).build();
-        Edge edge2 = Edge.builder().sourceNode(42).targetNode(13).build();
+        Edge edge1 =
+                Edge.builder()
+                        .sourceNode(42)
+                        .targetNode(17)
+                        .sourceLabel(1)
+                        .targetLabel(2)
+                        .sourceEmbedding("test1".getBytes())
+                        .targetEmbedding("test2".getBytes())
+                        .build();
+
+        Edge edge2 =
+                Edge.builder()
+                        .sourceNode(42)
+                        .targetNode(13)
+                        .sourceLabel(1)
+                        .targetLabel(3)
+                        .sourceEmbedding("test1".getBytes())
+                        .targetEmbedding("test3".getBytes())
+                        .build();
+
         List<Edge> edges = Arrays.asList(edge1, edge2);
         List<Integer> samples = sampler.map(edges);
         assertEquals(samples.get(0), 17);

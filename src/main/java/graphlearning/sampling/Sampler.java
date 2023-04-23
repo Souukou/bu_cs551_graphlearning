@@ -4,6 +4,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 
 import com.google.gson.Gson;
 import graphlearning.helper.RandomNumbers;
+import graphlearning.rocksdb.RocksDBWriter;
 import graphlearning.types.Edge;
 
 import java.io.FileReader;
@@ -27,6 +28,8 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
      */
     private Reservoir reservoir;
 
+    private RocksDBWriter dbWriter;
+
     private final Integer numOfSamples;
     private List<Integer> oldNodes;
 
@@ -41,6 +44,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
             System.out.println("No initial nodes provided. Using empty reservoir.");
             oldNodes = new ArrayList<>();
         }
+        dbWriter = new RocksDBWriter();
     }
 
     @Override
@@ -55,22 +59,26 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
                 .forEach(node -> nodeSet.add(node));
         List<Integer> allNodes = new ArrayList<>();
         allNodes.addAll(nodeSet);
-
+        System.out.println("all nodes: " + allNodes);
         // find new nodes (requires db)
         List<Integer> newNodes =
                 allNodes.stream().filter(node -> newNode(node)).collect(Collectors.toList());
 
         // insert edges into database
-        edges.stream().forEach(edge -> insertEdge(edge.getSourceNode(), edge.getTargetNode()));
+        edges.stream()
+                .forEach(edge -> dbWriter.insertEdge(edge.getSourceNode(), edge.getTargetNode()));
+
         // insert new nodes into database (requires db)
         for (Integer node : newNodes) {
             for (Edge edge : edges) {
+
                 if (edge.getSourceNode().equals(node)) {
-                    insertNode(node, edge.getSourceLabel(), edge.getSourceEmbedding());
+
+                    dbWriter.insertNode(node, edge.getSourceLabel(), edge.getSourceEmbedding());
                     break;
                 }
                 if (edge.getTargetNode().equals(node)) {
-                    insertNode(node, edge.getTargetLabel(), edge.getTargetEmbedding());
+                    dbWriter.insertNode(node, edge.getTargetLabel(), edge.getTargetEmbedding());
                     break;
                 }
             }
@@ -109,18 +117,14 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         return true;
     }
 
-    private void insertNode(Integer id, Integer label, List<Byte> embedding) {
-        return;
-    }
-
-    private void insertEdge(Integer sourceId, Integer targetId) {
-        return;
-    }
-
     private List<Integer> sampleNewNodes(List<Integer> newNodes, int numOfSamples) {
         List<Integer> indices = RandomNumbers.randomNumbers(0, newNodes.size() - 1, numOfSamples);
         List<Integer> samples =
                 indices.stream().map(i -> newNodes.get(i)).collect(Collectors.toList());
         return samples;
+    }
+
+    public void finalize() {
+        dbWriter.finalize();
     }
 }

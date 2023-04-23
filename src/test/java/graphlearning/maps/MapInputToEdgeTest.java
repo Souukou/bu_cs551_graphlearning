@@ -3,12 +3,8 @@ package graphlearning.maps;
 import org.apache.flink.streaming.connectors.wikiedits.WikipediaEditEvent;
 
 import graphlearning.types.Edge;
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.easymock.EasyMock.mock;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,10 +18,9 @@ class MapInputToEdgeTest {
     void setUp() {
         editEvent = mock(WikipediaEditEvent.class);
         myMap = new MapInputToGraphChange();
-        List<Byte> byteListSource =
-                Arrays.asList(ArrayUtils.toObject("This is a byte string".getBytes()));
-        List<Byte> byteListTarget =
-                Arrays.asList(ArrayUtils.toObject("This is another byte string".getBytes()));
+        byte[] byteListSource = "This is a byte string".getBytes();
+        byte[] byteListTarget = "This is another byte string".getBytes();
+
         edge =
                 Edge.builder()
                         .sourceNode(42)

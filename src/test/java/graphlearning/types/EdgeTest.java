@@ -3,10 +3,8 @@ package graphlearning.types;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** EdgeTest. */
 class EdgeTest {
@@ -20,8 +18,8 @@ class EdgeTest {
                         .targetNode(17)
                         .sourceLabel(100)
                         .targetLabel(101)
-                        .sourceEmbedding(new ArrayList<>())
-                        .targetEmbedding(new ArrayList<>())
+                        .sourceEmbedding("test1".getBytes())
+                        .targetEmbedding("test2".getBytes())
                         .timestamp("timestamp")
                         .build();
     }
@@ -37,8 +35,8 @@ class EdgeTest {
         assertEquals(edge.getTargetNode(), 17);
         assertEquals(edge.getSourceLabel(), 100);
         assertEquals(edge.getTargetLabel(), 101);
-        assertTrue(edge.getSourceEmbedding().isEmpty());
-        assertTrue(edge.getTargetEmbedding().isEmpty());
+        assertArrayEquals(edge.getSourceEmbedding(), "test1".getBytes());
+        assertArrayEquals(edge.getTargetEmbedding(), "test2".getBytes());
         assertEquals(edge.getTimestamp(), "timestamp");
     }
 }

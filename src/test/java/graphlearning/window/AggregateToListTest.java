@@ -24,8 +24,8 @@ class AggregateToListTest {
                         .targetNode(17)
                         .sourceLabel(100)
                         .targetLabel(101)
-                        .sourceEmbedding(new ArrayList<>())
-                        .targetEmbedding(new ArrayList<>())
+                        .sourceEmbedding("test1".getBytes())
+                        .targetEmbedding("test2".getBytes())
                         .timestamp("timestamp")
                         .build();
     }
@@ -52,8 +52,8 @@ class AggregateToListTest {
                         .targetNode(17)
                         .sourceLabel(100)
                         .targetLabel(101)
-                        .sourceEmbedding(new ArrayList<>())
-                        .targetEmbedding(new ArrayList<>())
+                        .sourceEmbedding("test1".getBytes())
+                        .targetEmbedding("test2".getBytes())
                         .timestamp("timestamp")
                         .build();
 

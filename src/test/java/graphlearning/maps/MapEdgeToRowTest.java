@@ -6,8 +6,6 @@ import graphlearning.types.Edge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MapEdgeToRowTest {
@@ -23,8 +21,8 @@ class MapEdgeToRowTest {
                         .targetNode(17)
                         .sourceLabel(100)
                         .targetLabel(101)
-                        .sourceEmbedding(new ArrayList<>())
-                        .targetEmbedding(new ArrayList<>())
+                        .sourceEmbedding("test".getBytes())
+                        .targetEmbedding("test2".getBytes())
                         .timestamp("timestamp")
                         .build();
     }
