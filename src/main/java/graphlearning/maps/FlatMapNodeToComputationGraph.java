@@ -7,6 +7,7 @@ import graphlearning.types.NodeComputationGraph;
 
 import java.util.List;
 
+/** FlatMapNodeToComputationGraph. */
 public class FlatMapNodeToComputationGraph
         implements FlatMapFunction<List<Integer>, NodeComputationGraph> {
     @Override

@@ -6,6 +6,7 @@ import org.apache.flink.types.Row;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/** NodeComputationGraph. */
 @Getter
 @AllArgsConstructor
 public class NodeComputationGraph {

@@ -7,6 +7,7 @@ import graphlearning.types.Edge;
 import java.util.ArrayList;
 import java.util.List;
 
+/** AggregateToList. */
 public class AggregateToList implements AggregateFunction<Edge, List<Edge>, List<Edge>> {
     @Override
     public List<Edge> createAccumulator() {

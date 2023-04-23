@@ -2,12 +2,21 @@ package graphlearning.sampling;
 
 import org.apache.flink.api.common.functions.MapFunction;
 
+import com.google.gson.Gson;
 import graphlearning.helper.RandomNumbers;
 import graphlearning.types.Edge;
 
-import java.util.*;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+/** Sampler. */
 public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
 
     /**
@@ -16,7 +25,23 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
      *
      * <p>Note: instead of a local variable we should instead use Flink state
      */
-    private Reservoir reservoir = new Reservoir();
+    private Reservoir reservoir;
+
+    private final Integer numOfSamples;
+    private List<Integer> oldNodes;
+
+    public Sampler(Integer numOfSamples, String initialNodesPath) {
+        this.numOfSamples = numOfSamples;
+        Gson gson = new Gson();
+        try {
+            Reader reader = new FileReader(initialNodesPath);
+            oldNodes = gson.fromJson(reader, Nodes.class).getPtNodes();
+        } catch (IOException e) {
+            // e.printStackTrace();
+            System.out.println("No initial nodes provided. Using empty reservoir.");
+            oldNodes = new ArrayList<>();
+        }
+    }
 
     @Override
     public List<Integer> map(List<Edge> edges) {
@@ -28,12 +53,12 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
                 .flatMap(List::stream)
                 .collect(Collectors.toList())
                 .forEach(node -> nodeSet.add(node));
-        List<Integer> nodes = new ArrayList<>();
-        nodes.addAll(nodeSet);
+        List<Integer> allNodes = new ArrayList<>();
+        allNodes.addAll(nodeSet);
 
-        // filter old nodes (requires db)
+        // find new nodes (requires db)
         List<Integer> newNodes =
-                nodes.stream().filter(node -> newNode(node)).collect(Collectors.toList());
+                allNodes.stream().filter(node -> newNode(node)).collect(Collectors.toList());
 
         // insert edges into database
         edges.stream().forEach(edge -> insertEdge(edge.getSourceNode(), edge.getTargetNode()));
@@ -53,17 +78,19 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
 
         // sample new nodes
         List<Integer> newSamples = new ArrayList<>();
-        if (newNodes.size() < reservoir.getSize() / 2) {
+        if (newNodes.size() < numOfSamples / 2) {
             newSamples = newNodes;
         } else {
-            newSamples = sampleNewNodes(newNodes, reservoir.getSize() / 2);
+            newSamples = sampleNewNodes(newNodes, numOfSamples / 2);
         }
 
-        // sample some old nodes from the reservoir
-        List<Integer> oldSamples = reservoir.sample(reservoir.getSize() / 2);
+        // sample some old nodes from the graph
+        reservoir = new Reservoir(numOfSamples / 2);
+        oldNodes.stream().forEach(id -> reservoir.update(id));
+        List<Integer> oldSamples = reservoir.getReservoir();
 
-        // update the reservoir
-        newNodes.stream().forEach(node -> reservoir.update(node));
+        // update the list of nodes
+        newNodes.stream().forEach(id -> oldNodes.add(id));
 
         // concatenate new and old nodes into a single list
         List<Integer> sampledNodes = new ArrayList<>();

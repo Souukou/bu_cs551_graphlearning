@@ -7,6 +7,7 @@ import graphlearning.types.Edge;
 
 import java.util.List;
 
+/** MapEdgeToRow. */
 public class MapEdgeToRow implements MapFunction<Edge, Row> {
     @Override
     public Row map(Edge edge) {

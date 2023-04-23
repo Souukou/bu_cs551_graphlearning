@@ -9,6 +9,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** ReservoirTest. */
 class ReservoirTest {
     private Reservoir reservoir;
 
@@ -21,7 +22,7 @@ class ReservoirTest {
     void updateOneTime() {
         reservoir.update(1);
         List<Integer> reservoirList = reservoir.getReservoir();
-        assertEquals(reservoirList.size(), 10);
+        assertEquals(reservoirList.size(), 1);
         assertEquals(reservoirList.get(0), 1);
     }
 
@@ -49,10 +50,7 @@ class ReservoirTest {
         List<Integer> list = reservoir.getReservoir();
         assertEquals(list.get(0), 1);
         assertEquals(list.get(1), 2);
-        assertEquals(list.size(), reservoir.getSize());
-        for (int i = 2; i < reservoir.getSize(); i++) {
-            assertEquals(list.get(i), 0);
-        }
+        assertEquals(list.size(), 2);
     }
 
     @Test
