@@ -1,8 +1,9 @@
 package graphlearning.maps;
 
 import org.apache.flink.api.common.functions.MapFunction;
-import graphlearning.types.Edge;
 import org.apache.flink.types.Row;
+
+import graphlearning.types.Edge;
 
 import java.util.List;
 
@@ -23,8 +24,6 @@ public class MapEdgeToRow implements MapFunction<Edge, Row> {
                 targetEmbedding,
                 sourceLabel,
                 targetLabel,
-                timestamp
-        );
+                timestamp);
     }
-
 }

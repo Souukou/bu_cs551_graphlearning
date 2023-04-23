@@ -1,12 +1,11 @@
 package graphlearning.types;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple4;
 import org.apache.flink.types.Row;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 @Getter
 @AllArgsConstructor
 public class NodeComputationGraph {

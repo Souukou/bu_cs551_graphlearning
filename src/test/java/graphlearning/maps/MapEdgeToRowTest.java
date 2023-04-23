@@ -1,7 +1,8 @@
 package graphlearning.maps;
 
-import graphlearning.types.Edge;
 import org.apache.flink.types.Row;
+
+import graphlearning.types.Edge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,18 +13,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class MapEdgeToRowTest {
     private Edge edge;
     private MapEdgeToRow mapEdgeToRow;
+
     @BeforeEach
     void setUp() {
         mapEdgeToRow = new MapEdgeToRow();
-        edge =  Edge.builder()
-                .sourceNode(42)
-                .targetNode(17)
-                .sourceLabel(100)
-                .targetLabel(101)
-                .sourceEmbedding(new ArrayList<>())
-                .targetEmbedding(new ArrayList<>())
-                .timestamp("timestamp")
-                .build();
+        edge =
+                Edge.builder()
+                        .sourceNode(42)
+                        .targetNode(17)
+                        .sourceLabel(100)
+                        .targetLabel(101)
+                        .sourceEmbedding(new ArrayList<>())
+                        .targetEmbedding(new ArrayList<>())
+                        .timestamp("timestamp")
+                        .build();
     }
 
     @Test

@@ -1,7 +1,8 @@
 package graphlearning.maps;
 
-import graphlearning.types.NodeComputationGraph;
 import org.apache.flink.types.Row;
+
+import graphlearning.types.NodeComputationGraph;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MapComputationGraphToRowTest {
     private MapComputationGraphToRow mapComputationGraphToRow;
     private NodeComputationGraph nodeComputationGraph;
+
     @BeforeEach
     void setUp() {
         mapComputationGraphToRow = new MapComputationGraphToRow();

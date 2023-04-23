@@ -1,6 +1,5 @@
 package graphlearning.types;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -13,16 +12,18 @@ class EdgeTest {
 
     @BeforeEach
     void setUp() {
-        edge =  Edge.builder()
-                .sourceNode(42)
-                .targetNode(17)
-                .sourceLabel(100)
-                .targetLabel(101)
-                .sourceEmbedding(new ArrayList<>())
-                .targetEmbedding(new ArrayList<>())
-                .timestamp("timestamp")
-                .build();
+        edge =
+                Edge.builder()
+                        .sourceNode(42)
+                        .targetNode(17)
+                        .sourceLabel(100)
+                        .targetLabel(101)
+                        .sourceEmbedding(new ArrayList<>())
+                        .targetEmbedding(new ArrayList<>())
+                        .timestamp("timestamp")
+                        .build();
     }
+
     @Test
     void testToString() {
         assertEquals(edge.toString(), "(42, 17, timestamp)");
@@ -37,8 +38,5 @@ class EdgeTest {
         assertTrue(edge.getSourceEmbedding().isEmpty());
         assertTrue(edge.getTargetEmbedding().isEmpty());
         assertEquals(edge.getTimestamp(), "timestamp");
-
     }
-
-
 }

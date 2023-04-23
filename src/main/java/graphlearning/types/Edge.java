@@ -17,12 +17,6 @@ public class Edge {
     private String timestamp;
 
     public String toString() {
-        return "("
-                + sourceNode
-                + ", "
-                + targetNode
-                + ", "
-                + timestamp
-                + ")";
+        return "(" + sourceNode + ", " + targetNode + ", " + timestamp + ")";
     }
 }

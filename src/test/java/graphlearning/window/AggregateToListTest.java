@@ -1,26 +1,25 @@
 package graphlearning.window;
 
-
 import graphlearning.types.Edge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AggregateToListTest {
     private AggregateToList aggregateToList;
     private Edge edge;
+
     @BeforeEach
     void setUp() {
         aggregateToList = new AggregateToList();
-        edge =  Edge.builder()
+        edge =
+                Edge.builder()
                         .sourceNode(42)
                         .targetNode(17)
                         .sourceLabel(100)
@@ -47,15 +46,17 @@ class AggregateToListTest {
 
     @Test
     void testGetResult() {
-        Edge edge =  Edge.builder()
-                .sourceNode(42)
-                .targetNode(17)
-                .sourceLabel(100)
-                .targetLabel(101)
-                .sourceEmbedding(new ArrayList<>())
-                .targetEmbedding(new ArrayList<>())
-                .timestamp("timestamp")
-                .build();;
+        Edge edge =
+                Edge.builder()
+                        .sourceNode(42)
+                        .targetNode(17)
+                        .sourceLabel(100)
+                        .targetLabel(101)
+                        .sourceEmbedding(new ArrayList<>())
+                        .targetEmbedding(new ArrayList<>())
+                        .timestamp("timestamp")
+                        .build();
+        ;
         List<Edge> acc = Arrays.asList(edge);
 
         List<Edge> result = aggregateToList.getResult(acc);

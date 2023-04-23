@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ReservoirTest {
     private Reservoir reservoir;
+
     @BeforeEach
     void setUp() {
         reservoir = new Reservoir(10);
@@ -26,7 +27,7 @@ class ReservoirTest {
     @Test
     void updateMultipleTimes() {
         int size = reservoir.getReservoir().size();
-        for (int i=0; i<2 * size; i++) {
+        for (int i = 0; i < 2 * size; i++) {
             reservoir.update(i);
         }
         assertEquals(reservoir.getReservoir().size(), size);
@@ -39,6 +40,7 @@ class ReservoirTest {
         reservoir.update(2);
         assertEquals(reservoir.getSize(), size);
     }
+
     @Test
     void getReservoir() {
         reservoir.update(1);
@@ -51,7 +53,7 @@ class ReservoirTest {
 
     @Test
     void sample() {
-        for (int i=0; i< 2 * reservoir.getSize(); i++) {
+        for (int i = 0; i < 2 * reservoir.getSize(); i++) {
             reservoir.update(i);
         }
         List<Integer> list = reservoir.getReservoir();
@@ -71,11 +73,10 @@ class ReservoirTest {
 
     @Test
     void sampleMoreThanSize() {
-        for (int i=0; i<2 * reservoir.getSize(); i++) {
+        for (int i = 0; i < 2 * reservoir.getSize(); i++) {
             reservoir.update(i);
         }
         List<Integer> samples = reservoir.sample(reservoir.getSize() + 2);
         assertEquals(samples.size(), reservoir.getSize());
     }
-
 }

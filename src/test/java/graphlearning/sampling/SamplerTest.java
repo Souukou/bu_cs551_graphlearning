@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class SamplerTest {
     private Sampler sampler;
+
     @BeforeEach
     void setUp() {
         int numOfSamples = 10;
@@ -21,16 +22,10 @@ class SamplerTest {
 
     @Test
     void map() {
-        Edge edge1 = Edge.builder()
-                .sourceNode(42)
-                .targetNode(17)
-                .build();
-        Edge edge2 = Edge.builder()
-                .sourceNode(42)
-                .targetNode(13)
-                .build();
+        Edge edge1 = Edge.builder().sourceNode(42).targetNode(17).build();
+        Edge edge2 = Edge.builder().sourceNode(42).targetNode(13).build();
         List<Edge> edges = Arrays.asList(edge1, edge2);
-        List<Integer> samples =  sampler.map(edges);
+        List<Integer> samples = sampler.map(edges);
         assertEquals(samples.get(0), 17);
         assertEquals(samples.get(1), 42);
         assertEquals(samples.get(2), 13);

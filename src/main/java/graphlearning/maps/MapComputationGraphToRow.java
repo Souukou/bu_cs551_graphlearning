@@ -1,9 +1,9 @@
 package graphlearning.maps;
 
 import org.apache.flink.api.common.functions.MapFunction;
-import graphlearning.types.NodeComputationGraph;
 import org.apache.flink.types.Row;
-import org.w3c.dom.Node;
+
+import graphlearning.types.NodeComputationGraph;
 
 public class MapComputationGraphToRow implements MapFunction<NodeComputationGraph, Row> {
     @Override
