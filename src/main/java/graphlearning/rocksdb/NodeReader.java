@@ -6,9 +6,9 @@ import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
 /** NodeReader Interface. Provide a standalone method findFeatures. */
-public interface NodeReader {
+public class NodeReader {
     /**
-     * findNeighbor(Integer nodeId, RocksDB dbEdges).
+     * findFeatures(Integer nodeId, RocksDB dbEdges).
      *
      * <p>NodeReader provides a standalone function that reads the given nodeId's label and features
      * attribute. It does not handle db connections and needs to pass a RocksDB handle into it.
@@ -17,7 +17,7 @@ public interface NodeReader {
      * @param db RocksDB instance
      * @return Tuple3&lt;Integer: nodeID, Integer: label, String: embedding&gt;
      */
-    default Tuple3<Integer, Integer, String> findFeatures(Integer nodeId, RocksDB db) {
+    public static Tuple3<Integer, Integer, String> findFeatures(Integer nodeId, RocksDB db) {
         try {
             byte[] keyByte = Integer.toString(nodeId).getBytes();
             byte[] value = db.get(keyByte);
