@@ -21,18 +21,18 @@ def build_parser():
     return parser
 
 
-class OrderBySourceNode(rocksdb.interfaces.Comparator):
+class OrderByCount(rocksdb.interfaces.Comparator):
     def compare(self, left, right):
         s0, t0 = left.decode("UTF-8").split("|")
         s1, t1 = right.decode("UTF-8").split("|")
-        if int(s0) < int(s1):
+        if int(t0) < int(t1):
             return -1
-        if int(s1) > int(s0):
+        if int(t1) > int(t0):
             return 1
         return 0
 
     def name(self):
-        return "OrderBySourceNode".encode("UTF-8")
+        return "OrderByCount".encode("UTF-8")
 
 
 class GraphDB:
@@ -43,7 +43,7 @@ class GraphDB:
         path.mkdir(exist_ok=True, parents=True)
         self.nodesdb = rocksdb.DB(str(path), opts, read_only=read_only)
 
-        opts = GraphDB.get_options()
+        opts = GraphDB.get_options(True)
         path = pathlib.Path(f"{savedir}/edges.db")
         path.mkdir(exist_ok=True, parents=True)
         self.edgesdb = rocksdb.DB(str(path), opts, read_only=read_only)
@@ -55,7 +55,7 @@ class GraphDB:
         self._nodes = set(range(num_nodes))
 
     @staticmethod
-    def get_options():
+    def get_options(edge=False):
         opts = rocksdb.Options()
         opts.create_if_missing = True
         opts.max_open_files = 300000
@@ -67,6 +67,8 @@ class GraphDB:
             block_cache=rocksdb.LRUCache(2 * (1024**3)),
             block_cache_compressed=rocksdb.LRUCache(500 * (1024**2)),
         )
+        if edges:
+          opts.comparator = OrderByCount
         return opts
 
     def disconnected_nodes_so_far(self):
