@@ -55,7 +55,7 @@ class GraphDB:
         self._nodes = set(range(num_nodes))
 
     @staticmethod
-    def get_options(edge=False):
+    def get_options(edges=False):
         opts = rocksdb.Options()
         opts.create_if_missing = True
         opts.max_open_files = 300000
@@ -68,7 +68,7 @@ class GraphDB:
             block_cache_compressed=rocksdb.LRUCache(500 * (1024**2)),
         )
         if edges:
-          opts.comparator = OrderByCount
+          opts.comparator = OrderByCount()
         return opts
 
     def disconnected_nodes_so_far(self):
