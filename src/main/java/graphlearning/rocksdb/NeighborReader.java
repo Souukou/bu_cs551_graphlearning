@@ -64,6 +64,9 @@ public class NeighborReader {
     public static ArrayList<Integer> findNeighborReservoir(
             Integer nodeId, RocksDB dbEdges, Integer maxNumOfNeighbors) {
         ArrayList<Integer> neighborsList = new ArrayList<Integer>();
+        if (maxNumOfNeighbors == -1) {
+            System.out.println("Max Number of Neighbors: " + maxNumOfNeighbors);
+        }
         Reservoir reservoir = new Reservoir(maxNumOfNeighbors);
 
         RocksIterator iterEdges = dbEdges.newIterator();

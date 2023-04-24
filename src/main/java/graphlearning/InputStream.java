@@ -25,6 +25,7 @@ class InputStream {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "rise.bu.edu:9092");
         properties.setProperty("topic.id", "test");
+        int maxNumNeighbors = 2, maxTrainingSamples = 10;
 
         // create a Kafka consumer
         KafkaSource<Event> source =
@@ -45,11 +46,11 @@ class InputStream {
         DataStream<List<Integer>> sampledNodes =
                 windowed.map(
                         new Sampler(
-                                10,
-                                "/home/grad3/amliu/streaminggraph/src/main/java/graphlearning/sampling/pretrained_nodes.json"));
+                                maxTrainingSamples,
+                                "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json"));
 
         DataStream<NodeComputationGraph> compGraphs =
-                sampledNodes.flatMap(new FlatMapNodeToComputationGraph());
+                sampledNodes.flatMap(new FlatMapNodeToComputationGraph(maxNumNeighbors));
 
         DataStream<Row> rows = compGraphs.map(new MapComputationGraphToRow());
 

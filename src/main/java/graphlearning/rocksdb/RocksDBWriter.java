@@ -14,7 +14,7 @@ import java.util.ArrayList;
 
 /**
  * RocksDB writer interface to insert nodes and edges to RocksDB. By default, it will read/write
- * from the dataset-test/nodes.db, dataset-test/edge.db and dataset-test/neighbor.db
+ * from the dataset-test/nodes.db, dataset-test/edges.db and dataset-test/neighbor.db
  */
 public class RocksDBWriter {
     private String nodeDbPath;
@@ -26,7 +26,7 @@ public class RocksDBWriter {
     private RocksDB neighborDb;
 
     /**
-     * RocksDBReader constructor with costomized node and edge db path.
+     * RocksDBReader constructor with costomized node and edges.db path.
      *
      * @param nodeDbPath
      * @param edgeDbPath
@@ -39,15 +39,15 @@ public class RocksDBWriter {
     }
 
     /**
-     * RocksDBReader constructor with default node and edge db path.
+     * RocksDBReader constructor with default node and edges.db path.
      *
      * <p>default nodes.db path: dataset-test/nodes.db
      *
-     * <p>default edge db path: dataset-test/edge.db
+     * <p>default edges.db path: dataset-test/edges.db
      */
     public RocksDBWriter() {
-        this.nodeDbPath = "dataset-test/node.db";
-        this.edgeDbPath = "dataset-test/edge.db";
+        this.nodeDbPath = "dataset-test/nodes.db";
+        this.edgeDbPath = "dataset-test/edges.db";
         this.neighborPath = "dataset-test/neighbor.db";
         this.open();
     }
@@ -129,7 +129,7 @@ public class RocksDBWriter {
     }
 
     /**
-     * insertEdge(Integer srcId, Integer dstId). Insert an edge into the edge db, also update the
+     * insertEdge(Integer srcId, Integer dstId). Insert an edge into the edges.db, also update the
      * number of neighbors in neighbor db. If the edge exist, do nothing.
      *
      * @param srcId query edge's source node id
@@ -143,7 +143,7 @@ public class RocksDBWriter {
         }
         // find the number of neighbors of srcId
         int neighborNum = neighbors == null ? 0 : neighbors.size();
-        // insert the edge into the edge db
+        // insert the edge into the edges.db
         try {
             byte[] keyByte = (String.format("%d|%d", srcId, neighborNum)).getBytes();
             byte[] valueByte = Integer.toString(dstId).getBytes();

@@ -33,13 +33,17 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
 
     public Sampler(Integer numOfSamples, String initialNodesPath) {
         this.numOfSamples = numOfSamples;
+        System.out.println("Test 1");
         Gson gson = new Gson();
+        System.out.println("Test 2");
         try {
             Reader reader = new FileReader(initialNodesPath);
             oldNodes = gson.fromJson(reader, Nodes.class).getPtNodes();
         } catch (IOException e) {
-            // e.printStackTrace();
             System.out.println("No initial nodes provided. Using empty reservoir.");
+            oldNodes = new ArrayList<>();
+        }
+        if (oldNodes == null) {
             oldNodes = new ArrayList<>();
         }
     }

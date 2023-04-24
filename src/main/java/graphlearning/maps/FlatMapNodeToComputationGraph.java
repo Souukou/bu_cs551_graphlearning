@@ -5,28 +5,34 @@ import org.apache.flink.util.Collector;
 
 import graphlearning.rocksdb.RocksDBReader;
 import graphlearning.types.NodeComputationGraph;
+import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** FlatMapNodeToComputationGraph. */
+@AllArgsConstructor
 public class FlatMapNodeToComputationGraph
         implements FlatMapFunction<List<Integer>, NodeComputationGraph> {
+
+    private Integer maxNumNeighbors;
+
     @Override
     public void flatMap(List<Integer> ids, Collector<NodeComputationGraph> out) {
         ids.stream()
                 .forEach(
                         nodeId -> {
-                            String computationGraph = kNeighbors(nodeId);
+                            String computationGraph = kNeighbors(nodeId, maxNumNeighbors);
                             NodeComputationGraph nodeComputationGraph =
                                     new NodeComputationGraph(nodeId, computationGraph);
                             out.collect(nodeComputationGraph);
                         });
     }
 
-    private String kNeighbors(Integer nodeId) {
+    private String kNeighbors(Integer nodeId, Integer maxNumNeighbors) {
         RocksDBReader reader = new RocksDBReader();
-        ArrayList<ArrayList<Integer>> neighbors = reader.getKNeighborIdReservoir(nodeId, 3, -1);
+        ArrayList<ArrayList<Integer>> neighbors =
+                reader.getKNeighborIdReservoir(nodeId, 3, maxNumNeighbors);
         if (neighbors.size() == 0) {
             return "";
         }
