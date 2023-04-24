@@ -46,8 +46,8 @@ public class RocksDBWriter {
      * <p>default edge db path: dataset-test/edge.db
      */
     public RocksDBWriter() {
-        this.nodeDbPath = "dataset-test/nodes.db";
-        this.edgeDbPath = "dataset-test/edges.db";
+        this.nodeDbPath = "dataset-test/node.db";
+        this.edgeDbPath = "dataset-test/edge.db";
         this.neighborPath = "dataset-test/neighbor.db";
         this.open();
     }

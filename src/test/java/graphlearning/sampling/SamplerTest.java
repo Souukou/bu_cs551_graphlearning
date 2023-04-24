@@ -1,13 +1,9 @@
 package graphlearning.sampling;
 
 import graphlearning.types.Edge;
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,18 +21,17 @@ class SamplerTest {
         sampler = new Sampler(numOfSamples, initialNodesPath);
     }
 
-    @AfterEach
-    void tearDown() {
-        sampler.finalize();
-        // delete the dataset-test directory
-        try {
-            FileUtils.deleteDirectory(new File("dataset-test"));
-        } catch (Exception e) {
-            System.err.println("Error when delete RocksDB: " + e.getMessage());
-            e.printStackTrace();
-            Assertions.assertTrue(false);
-        }
-    }
+    // @AfterEach
+    // void tearDown() {
+    //     // delete the dataset-test directory
+    //     try {
+    //         FileUtils.deleteDirectory(new File("dataset-test"));
+    //     } catch (Exception e) {
+    //         System.err.println("Error when delete RocksDB: " + e.getMessage());
+    //         e.printStackTrace();
+    //         Assertions.assertTrue(false);
+    //     }
+    // }
 
     @Test
     void map() {
