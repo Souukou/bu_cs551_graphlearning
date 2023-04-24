@@ -13,7 +13,7 @@ class FlatMapNodeToComputationGraphTest {
 
     @BeforeEach
     void setUp() {
-        flatMapNode = new FlatMapNodeToComputationGraph();
+        flatMapNode = new FlatMapNodeToComputationGraph(3);
         nodeIds = new ArrayList<>();
         nodeIds.add(1);
         nodeIds.add(2);

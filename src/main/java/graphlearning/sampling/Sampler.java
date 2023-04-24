@@ -29,7 +29,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
     private Reservoir reservoir;
 
     private final Integer numOfSamples;
-    private List<Integer> oldNodes;
+    private HashSet<Integer> oldNodes;
 
     public Sampler(Integer numOfSamples, String initialNodesPath) {
         this.numOfSamples = numOfSamples;
@@ -38,13 +38,13 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         System.out.println("Test 2");
         try {
             Reader reader = new FileReader(initialNodesPath);
-            oldNodes = gson.fromJson(reader, Nodes.class).getPtNodes();
+            oldNodes = new HashSet<Integer>(gson.fromJson(reader, Nodes.class).getPtNodes());
         } catch (IOException e) {
             System.out.println("No initial nodes provided. Using empty reservoir.");
-            oldNodes = new ArrayList<>();
+            oldNodes = new HashSet<>();
         }
         if (oldNodes == null) {
-            oldNodes = new ArrayList<>();
+            oldNodes = new HashSet<>();
         }
     }
 
@@ -117,7 +117,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
            Otherwise, return false.
            (Here we need a call to the database api)
         */
-        return true;
+        return !oldNodes.contains(node);
     }
 
     private List<Integer> sampleNewNodes(List<Integer> newNodes, int numOfSamples) {
