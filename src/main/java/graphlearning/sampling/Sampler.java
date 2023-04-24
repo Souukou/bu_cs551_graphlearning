@@ -28,8 +28,6 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
      */
     private Reservoir reservoir;
 
-    private RocksDBWriter dbWriter;
-
     private final Integer numOfSamples;
     private List<Integer> oldNodes;
 
@@ -44,12 +42,12 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
             System.out.println("No initial nodes provided. Using empty reservoir.");
             oldNodes = new ArrayList<>();
         }
-        dbWriter = new RocksDBWriter();
     }
 
     @Override
     public List<Integer> map(List<Edge> edges) {
         // find nodes list
+        RocksDBWriter dbWriter = new RocksDBWriter();
         Set<Integer> nodeSet = new HashSet<Integer>();
 
         edges.stream()
@@ -105,6 +103,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         sampledNodes.addAll(newSamples);
         sampledNodes.addAll(oldSamples);
 
+        dbWriter.finalize();
         return sampledNodes;
     }
 
@@ -122,9 +121,5 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         List<Integer> samples =
                 indices.stream().map(i -> newNodes.get(i)).collect(Collectors.toList());
         return samples;
-    }
-
-    public void finalize() {
-        dbWriter.finalize();
     }
 }

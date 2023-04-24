@@ -38,7 +38,7 @@ public class StreamingGraph {
         }
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.setParallelism(2);
+        env.setParallelism(1);
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         final StreamStatementSet statementSet = tEnv.createStatementSet();
 

@@ -55,7 +55,11 @@ class InputStream {
         DataStream<List<Edge>> windowed =
                 edgeStream.countWindowAll(10).aggregate(new AggregateToList());
 
-        DataStream<List<Integer>> sampledNodes = windowed.map(new Sampler(10, ""));
+        DataStream<List<Integer>> sampledNodes =
+                windowed.map(
+                        new Sampler(
+                                10,
+                                "/home/grad3/amliu/streaminggraph/src/main/java/graphlearning/sampling/pretrained_nodes.json"));
 
         DataStream<NodeComputationGraph> compGraphs =
                 sampledNodes.flatMap(new FlatMapNodeToComputationGraph());
