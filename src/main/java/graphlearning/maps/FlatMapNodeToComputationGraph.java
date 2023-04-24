@@ -23,9 +23,11 @@ public class FlatMapNodeToComputationGraph
                 .forEach(
                         nodeId -> {
                             String computationGraph = kNeighbors(nodeId, maxNumNeighbors);
-                            NodeComputationGraph nodeComputationGraph =
-                                    new NodeComputationGraph(nodeId, computationGraph);
-                            out.collect(nodeComputationGraph);
+                            if (!computationGraph.isEmpty()) {
+                                NodeComputationGraph nodeComputationGraph =
+                                        new NodeComputationGraph(nodeId, computationGraph);
+                                out.collect(nodeComputationGraph);
+                            }
                         });
     }
 
