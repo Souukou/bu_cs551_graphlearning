@@ -1,6 +1,4 @@
 #!/bin/bash
-echo "Generating Dataset"
-python dump_to_rocksdb.py
 
 echo "Building..."
 mvn -DskipTests -Drat.skip=true -Dcheckstyle.skip install
@@ -11,4 +9,3 @@ flink run -pyfs src/main/python/ target/GraphOperators.jar --pyscript src/main/p
 
 echo "Trained"
 read -p "Press enter to shutdown"
-

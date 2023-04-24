@@ -1,0 +1,16 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files= true;
+option java_package = "graphlearning.kafka.protos";
+option java_outer_classname = "EventProtos";
+
+message Event {
+  google.protobuf.Timestamp timestamp = 1;
+  int32 source = 2;
+  int32 target = 3;
+  int32 source_label = 4;
+  int32 target_label = 5;
+  bytes source_data = 6;
+  bytes target_data = 7;
+}

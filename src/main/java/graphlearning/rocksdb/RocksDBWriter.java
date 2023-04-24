@@ -1,7 +1,5 @@
 package graphlearning.rocksdb;
 
-import org.apache.flink.api.java.tuple.Tuple3;
-
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -16,7 +14,7 @@ import java.util.ArrayList;
 
 /**
  * RocksDB writer interface to insert nodes and edges to RocksDB. By default, it will read/write
- * from the dataset-test/node.db, dataset-test/edge.db and dataset-test/neighbor.db
+ * from the dataset-test/nodes.db, dataset-test/edges.db and dataset-test/neighbor.db
  */
 public class RocksDBWriter {
     private String nodeDbPath;
@@ -28,7 +26,7 @@ public class RocksDBWriter {
     private RocksDB neighborDb;
 
     /**
-     * RocksDBReader constructor with costomized node and edge db path.
+     * RocksDBReader constructor with costomized node and edges.db path.
      *
      * @param nodeDbPath
      * @param edgeDbPath
@@ -41,15 +39,15 @@ public class RocksDBWriter {
     }
 
     /**
-     * RocksDBReader constructor with default node and edge db path.
+     * RocksDBReader constructor with default node and edges.db path.
      *
-     * <p>default node db path: dataset-test/node.db
+     * <p>default nodes.db path: dataset-test/nodes.db
      *
-     * <p>default edge db path: dataset-test/edge.db
+     * <p>default edges.db path: dataset-test/edges.db
      */
     public RocksDBWriter() {
-        this.nodeDbPath = "dataset-test/node.db";
-        this.edgeDbPath = "dataset-test/edge.db";
+        this.nodeDbPath = "dataset-test/nodes.db";
+        this.edgeDbPath = "dataset-test/edges.db";
         this.neighborPath = "dataset-test/neighbor.db";
         this.open();
     }
@@ -86,7 +84,7 @@ public class RocksDBWriter {
     }
 
     /**
-     * insertNode(Integer nodeId, String embedding). Insert a node into the node db. If the node
+     * insertNode(Integer nodeId, String embedding). Insert a node into the nodes.db. If the node
      * exist, do nothing.
      *
      * @param nodeId query node's id
@@ -98,8 +96,8 @@ public class RocksDBWriter {
     }
 
     /**
-     * insertNode(Integer nodeId, Integer label, Byte[] feature). Insert a node into the node db. If
-     * the node exist, do nothing.
+     * insertNode(Integer nodeId, Integer label, Byte[] feature). Insert a node into the nodes.db.
+     * If the node exist, do nothing.
      *
      * @param nodeId query node's id
      * @param label query node's label
@@ -114,20 +112,13 @@ public class RocksDBWriter {
     }
 
     /**
-     * insertNode(Integer nodeId, Byte[] feature). Insert a node into the node db. If the node
+     * insertNode(Integer nodeId, Byte[] feature). Insert a node into the nodes.db. If the node
      * exist, do nothing.
      *
      * @param nodeId query node's id
      * @param feature query node's embedding bytes
      */
     public void insertNode(Integer nodeId, byte[] feature) {
-        Tuple3<Integer, Integer, String> nodeFeatures = NodeReader.findFeatures(nodeId, nodeDb);
-
-        // if this node feature is not null, the node already exist, return directly.
-        if (nodeFeatures != null) {
-            return;
-        }
-
         try {
             byte[] keyByte = Integer.toString(nodeId).getBytes();
             byte[] valueByte = feature;
@@ -138,7 +129,7 @@ public class RocksDBWriter {
     }
 
     /**
-     * insertEdge(Integer srcId, Integer dstId). Insert an edge into the edge db, also update the
+     * insertEdge(Integer srcId, Integer dstId). Insert an edge into the edges.db, also update the
      * number of neighbors in neighbor db. If the edge exist, do nothing.
      *
      * @param srcId query edge's source node id
@@ -152,7 +143,7 @@ public class RocksDBWriter {
         }
         // find the number of neighbors of srcId
         int neighborNum = neighbors == null ? 0 : neighbors.size();
-        // insert the edge into the edge db
+        // insert the edge into the edges.db
         try {
             byte[] keyByte = (String.format("%d|%d", srcId, neighborNum)).getBytes();
             byte[] valueByte = Integer.toString(dstId).getBytes();

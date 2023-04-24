@@ -212,3 +212,8 @@ dataset-test
 flink-*
 
 dataset-ut
+
+protobuf
+
+apache-maven-*
+

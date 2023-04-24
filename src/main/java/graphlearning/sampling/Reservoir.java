@@ -5,12 +5,11 @@ import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-/** Implementation of Reservoir Sampling Algorithm. */
+/** Reservoir. */
 public class Reservoir implements Serializable {
     /**
      * Implementation of Reservoir Sampling Algorithm R. See
@@ -21,6 +20,10 @@ public class Reservoir implements Serializable {
     @Getter private Integer size;
     private Random rand;
     private int[] reservoir;
+
+    public Reservoir() {
+        this(10);
+    }
 
     public Reservoir(Integer size) {
         timestamp = 0;
@@ -43,7 +46,11 @@ public class Reservoir implements Serializable {
     }
 
     public List<Integer> getReservoir() {
-        return Arrays.stream(reservoir).boxed().collect(Collectors.toList());
+        List<Integer> res = new ArrayList<>();
+        for (int i = 0; i < size && i < timestamp; i++) {
+            res.add(reservoir[i]);
+        }
+        return res;
     }
 
     public List<Integer> sample(int numOfSamples) {

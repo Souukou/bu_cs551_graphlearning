@@ -86,9 +86,11 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
     def parse_record(self, record):
         with open('/opt/res.txt', 'w') as f:
           f.write(record)
-        # df = pd.read_csv(StringIO(record), names=["src", "label", "nbr", "embed"], encoding='utf8')
-        # df.to_csv('/opt/res.csv') 
-        # df['embed'] = df['embed'].apply(lambda x: bytes.fromhex(x))
+
+        df = pd.read_csv(StringIO(record), names=["src", "edges"], encoding='utf8')
+        print(record)
+        df.to_csv('/opt/res.csv') 
+        #df['embed'] = df['embed'].apply(lambda x: bytes.fromhex(x))
         ############ For debugging only, remove this later ######################
         # print("we are reading the sample data from the file")
         df = pd.read_csv('/opt/graphlearning/sample_data.csv')

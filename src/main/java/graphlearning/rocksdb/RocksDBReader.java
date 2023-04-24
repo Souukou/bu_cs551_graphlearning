@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * RocksDB read only interface to pull up node neighbors and features from RocksDB. By default, it
- * will read from the dataset-test/node.db and dataset-test/edge.db
+ * will read from the dataset-test/nodes.db and dataset-test/edges.db
  */
 public class RocksDBReader {
     private String nodeDbPath;
@@ -22,7 +22,7 @@ public class RocksDBReader {
     private RocksDB edgeDb;
 
     /**
-     * RocksDBReader constructor with costomized node and edge db path.
+     * RocksDBReader constructor with costomized node and edges.db path.
      *
      * @param nodeDbPath
      * @param edgeDbPath
@@ -34,15 +34,15 @@ public class RocksDBReader {
     }
 
     /**
-     * RocksDBReader constructor with default node and edge db path.
+     * RocksDBReader constructor with default node and edges.db path.
      *
-     * <p>default node db path: dataset-test/node.db
+     * <p>default nodes.db path: dataset-test/nodes.db
      *
-     * <p>default edge db path: dataset-test/edge.db
+     * <p>default edges.db path: dataset-test/edges.db
      */
     public RocksDBReader() {
-        this.nodeDbPath = "dataset-test/node.db";
-        this.edgeDbPath = "dataset-test/edge.db";
+        this.nodeDbPath = "dataset-test/nodes.db";
+        this.edgeDbPath = "dataset-test/edges.db";
         this.open();
     }
 
@@ -56,7 +56,7 @@ public class RocksDBReader {
     }
 
     /**
-     * Query the node's K neighbors ID from edge.db.
+     * Query the node's K neighbors ID from edges.db.
      *
      * @param nodeId query node's id
      * @param k {@code int} the number of levels of neighbors to be queried.
@@ -87,7 +87,7 @@ public class RocksDBReader {
     }
 
     /**
-     * Query the node's K neighbors ID from edge.db.
+     * Query the node's K neighbors ID from edges.db.
      *
      * @param nodeId query node's id
      * @param k {@code int} the number of levels of neighbors to be queried.
