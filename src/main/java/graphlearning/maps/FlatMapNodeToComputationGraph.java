@@ -3,8 +3,10 @@ package graphlearning.maps;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.util.Collector;
 
+import graphlearning.rocksdb.RocksDBReader;
 import graphlearning.types.NodeComputationGraph;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** FlatMapNodeToComputationGraph. */
@@ -23,6 +25,19 @@ public class FlatMapNodeToComputationGraph
     }
 
     private String kNeighbors(Integer nodeId) {
-        return "1-2|1-3|2-4|2-5|3-6|3-7";
+        RocksDBReader reader = new RocksDBReader();
+        ArrayList<ArrayList<Integer>> neighbors = reader.getKNeighborIdReservoir(nodeId, 3, -1);
+        if (neighbors.size() == 0) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < neighbors.size(); i++) {
+            for (int j = 0; j < neighbors.get(i).size(); j++) {
+                sb.append(String.format("%d-%d|", i + 1, neighbors.get(i).get(j)));
+            }
+        }
+        sb = new StringBuilder(sb.substring(0, sb.length() - 1));
+        reader.finalize();
+        return sb.toString();
     }
 }
