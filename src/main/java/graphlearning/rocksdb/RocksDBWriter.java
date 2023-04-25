@@ -1,5 +1,7 @@
 package graphlearning.rocksdb;
 
+import org.rocksdb.ComparatorOptions;
+import org.rocksdb.FlushOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -76,8 +78,14 @@ public class RocksDBWriter {
             Options options = new Options();
             options.setCreateIfMissing(true);
             nodeDb = RocksDB.open(options, nodeDbPath);
-            edgeDb = RocksDB.open(options, edgeDbPath);
             neighborDb = RocksDB.open(options, neighborPath);
+
+            Options options2 = new Options();
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            options2.setCreateIfMissing(true);
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            edgeDb = RocksDB.open(options2, edgeDbPath);
+
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
@@ -158,6 +166,18 @@ public class RocksDBWriter {
             neighborDb.put(keyByte, valueByte);
         } catch (RocksDBException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void flushNode() {
+        try {
+            FlushOptions flushOptions = new FlushOptions();
+            flushOptions.setWaitForFlush(true);
+            // flush then return
+            nodeDb.flush(flushOptions);
+        } catch (RocksDBException e) {
+            e.printStackTrace();
+            System.out.println("flush node db failed");
         }
     }
 
