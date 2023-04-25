@@ -25,7 +25,8 @@ class InputStream {
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "rise.bu.edu:9092");
         properties.setProperty("topic.id", "test");
-        int maxNumNeighbors = 2, maxTrainingSamples = 10;
+        int maxNumNeighbors = 2, maxTrainingSamples = 10, depthOfCompGraph = 3;
+        int windowSize = 10;
 
         // create a Kafka consumer
         KafkaSource<Event> source =
@@ -41,7 +42,7 @@ class InputStream {
         DataStream<Edge> edgeStream = kafkaStream.map(new MapEventToEdge());
 
         DataStream<List<Edge>> windowed =
-                edgeStream.countWindowAll(10).aggregate(new AggregateToList());
+                edgeStream.countWindowAll(windowSize).aggregate(new AggregateToList());
 
         DataStream<List<Integer>> sampledNodes =
                 windowed.map(

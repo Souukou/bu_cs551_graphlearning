@@ -16,6 +16,7 @@ public class FlatMapNodeToComputationGraph
         implements FlatMapFunction<List<Integer>, NodeComputationGraph> {
 
     private Integer maxNumNeighbors;
+    private Integer depthOfCompGraph;
 
     @Override
     public void flatMap(List<Integer> ids, Collector<NodeComputationGraph> out) {
@@ -34,7 +35,7 @@ public class FlatMapNodeToComputationGraph
     private String kNeighbors(Integer nodeId, Integer maxNumNeighbors) {
         RocksDBReader reader = new RocksDBReader();
         ArrayList<ArrayList<Integer>> neighbors =
-                reader.getKNeighborIdReservoir(nodeId, 3, maxNumNeighbors);
+                reader.getKNeighborIdReservoir(nodeId, depthOfCompGraph, maxNumNeighbors);
         if (neighbors.size() == 0) {
             return "";
         }
