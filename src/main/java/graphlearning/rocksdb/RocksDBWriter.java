@@ -1,5 +1,8 @@
 package graphlearning.rocksdb;
 
+import org.rocksdb.BlockBasedTableConfig;
+import org.rocksdb.BloomFilter;
+import org.rocksdb.LRUCache;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -73,8 +76,22 @@ public class RocksDBWriter {
             createDirIfNotExists(nodeDbPath);
             createDirIfNotExists(edgeDbPath);
             createDirIfNotExists(neighborPath);
+            RocksDB.loadLibrary();
             Options options = new Options();
             options.setCreateIfMissing(true);
+
+            LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
+            LRUCache cacheCompressed = new LRUCache(500 * 1024 * 1024);
+            options.setTableFormatConfig(
+                    new BlockBasedTableConfig()
+                            .setFilter(new BloomFilter(10, false))
+                            .setBlockCache(cache)
+                            .setBlockCacheCompressed(cacheCompressed));
+            options.setMaxOpenFiles(300000);
+            options.setWriteBufferSize(67108864);
+            options.setMaxWriteBufferNumber(3);
+            options.setTargetFileSizeBase(67108864);
+
             nodeDb = RocksDB.open(options, nodeDbPath);
             edgeDb = RocksDB.open(options, edgeDbPath);
             neighborDb = RocksDB.open(options, neighborPath);
