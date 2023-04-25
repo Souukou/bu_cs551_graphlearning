@@ -1,5 +1,9 @@
 package graphlearning.rocksdb;
 
+import org.rocksdb.ComparatorOptions;
+import org.rocksdb.FlushOptions;
+import org.rocksdb.Options;
+
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
@@ -49,7 +53,11 @@ public class RocksDBReader {
     private void open() {
         try {
             nodeDb = RocksDB.openReadOnly(nodeDbPath);
-            edgeDb = RocksDB.openReadOnly(edgeDbPath);
+            Options options2 = new Options();
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            options2.setCreateIfMissing(true);
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            edgeDb = RocksDB.openReadOnly(options2, edgeDbPath);
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
