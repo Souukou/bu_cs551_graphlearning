@@ -4,6 +4,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.rocksdb.ComparatorOptions;
+import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
@@ -118,7 +120,11 @@ public class TestRocksDBWriter {
         rocksDBWriter.insertEdge(2, 4);
 
         // test edge
-        try (RocksDB edgeDb = RocksDB.openReadOnly(edgePath);
+        Options options = new Options();
+        ComparatorOptions comparatorOptions = new ComparatorOptions();
+        options.setCreateIfMissing(true);
+        options.setComparator(new OrderByCountComparator(comparatorOptions));
+        try (RocksDB edgeDb = RocksDB.openReadOnly(options, edgePath);
                 RocksDB neighborDb = RocksDB.openReadOnly(neighborPath)) {
             Assertions.assertArrayEquals("2".getBytes(), edgeDb.get("1|0".getBytes()));
             Assertions.assertArrayEquals("3".getBytes(), edgeDb.get("1|1".getBytes()));

@@ -1,5 +1,7 @@
 package graphlearning.sampling;
 
+import org.apache.flink.configuration.Configuration;
+
 import graphlearning.types.Edge;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +21,13 @@ class SamplerTest {
         // If path doesn't exist, we assume the initial nodes to be an empty list
         String initialNodesPath = "";
         sampler = new Sampler(numOfSamples, initialNodesPath);
+        try {
+            sampler.open(new Configuration());
+        } catch (Exception e) {
+            System.err.println("Error when open RocksDB: " + e.getMessage());
+            e.printStackTrace();
+            assertEquals(1, 0);
+        }
     }
 
     // @AfterEach
