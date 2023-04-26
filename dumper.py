@@ -177,7 +177,8 @@ def main(
     assert pretrained_graph_path.exists()
     pretrained_graph = np.load(str(pretrained_graph_path), allow_pickle=True)[()]
     pretrained_graph = pretrained_graph["pt_mask"]
-    dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
+    # dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
+    dataset = torch_geometric.datasets.KarateClub()[0]
 
     if not tokafka:
       graphdb = GraphDB(dataset.num_nodes, savedir)
