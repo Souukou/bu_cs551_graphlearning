@@ -90,16 +90,19 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         return labels, features, all_node_list
     
     def create_input(self, src, edges, labels, features, all_node_list):
-        
-        idx_map = {src.item():0}
+        # print("src", src)
+        # print("edges:", edges)
+        idx_map = {}
         for idn in range(len(all_node_list)):
             idx_map[all_node_list[idn]] = idn
         new_edges = torch.zeros((2, len(edges[0]))).long()
+        # print("idx_map", idx_map)
         for idn in range(len(edges[0])):
             new_edges[0][idn] = idx_map[edges[0][idn]]
             new_edges[1][idn] = idx_map[edges[1][idn]]
         mask_all = [False for _ in range(len(all_node_list))]
-        mask_all[0] = True
+        src_new_idx = idx_map[src.item()]
+        mask_all[src_new_idx] = True
         
         new_data = PyG_Data(
             x=features,
@@ -137,6 +140,10 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         labels = labels.to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[2]])
         features = features.to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[3]])
         pyg_data = self.create_input(src, edges, labels, features, all_node_list)
+        # print(pyg_data.edge_index)
+        # print(pyg_data.x)
+        # print(pyg_data.y)
+        # print(pyg_data.train_mask)
 
         return pyg_data
         

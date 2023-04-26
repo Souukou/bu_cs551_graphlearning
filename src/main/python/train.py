@@ -39,7 +39,7 @@ def train(context: Context):
         writer = SummaryWriter(model_save_path+'_tsb')
     
     dataset = pytorch_context.get_dataset_from_flink()
-    data_loader = PyG_DataLoader(dataset, batch_size=1)
+    data_loader = PyG_DataLoader(dataset, batch_size=4)
 
     reddit_cofig = (301, 256, 41)
     kc_config = (34, 32, 4)
@@ -59,7 +59,7 @@ def train(context: Context):
     
     for batch_idx, data in enumerate(data_loader):
         
-        loss, acc = utils.val_step(model, data, device = device)
+        loss = utils.train_step(model, optimizer, data, device = device)
         if pytorch_context.get_rank() == 0:
             writer.add_scalar('training/loss', loss, batch_idx)
         
