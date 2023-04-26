@@ -9,6 +9,7 @@ import org.apache.flink.types.Row;
 
 import graphlearning.kafka.KafkaEventDeserializer;
 import graphlearning.kafka.MapEventToEdge;
+import graphlearning.kafka.RateCtrlKafkaEventDeserializer;
 import graphlearning.kafka.protos.Event;
 import graphlearning.maps.FlatMapNodeToComputationGraph;
 import graphlearning.maps.MapComputationGraphToRow;
@@ -33,8 +34,13 @@ class InputStream {
         Integer maxNumNeighbors = Integer.parseInt(properties.getProperty("neighbors.num")),
                 maxTrainingSamples = Integer.parseInt(properties.getProperty("reservoir.size")),
                 depthOfCompGraph = Integer.parseInt(properties.getProperty("compgraph.depth"));
-        int windowSize = 10;
+        int windowSize = Integer.parseInt(properties.getProperty("window.size"));
+        long maxRatePerSecond =
+                Long.parseLong(properties.getProperty("ratecontrol.maxRatePerSecond"));
         String datasetPath = properties.getProperty("dataset.path");
+
+        RateCtrlKafkaEventDeserializer rateCtrlSchema =
+                new RateCtrlKafkaEventDeserializer(maxRatePerSecond);
 
         // create a Kafka consumer
         KafkaSource<Event> source =
@@ -47,26 +53,35 @@ class InputStream {
 
         DataStream<Event> kafkaStream =
                 env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
-        DataStream<Edge> edgeStream = kafkaStream.map(new MapEventToEdge());
+        DataStream<Edge> edgeStream =
+                kafkaStream.map(new MapEventToEdge()).name("MapToEdge").disableChaining();
 
         DataStream<List<Edge>> windowed =
                 edgeStream
-                        .countWindowAll(Integer.parseInt(properties.getProperty("window.size")))
-                        .aggregate(new AggregateToList());
+                        .countWindowAll(windowSize)
+                        .aggregate(new AggregateToList())
+                        .name("Window")
+                        .disableChaining();
 
         DataStream<List<Integer>> sampledNodes =
                 windowed.map(
-                        new Sampler(
-                                maxTrainingSamples,
-                                "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json",
-                                datasetPath));
+                                new Sampler(
+                                        maxTrainingSamples,
+                                        "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json",
+                                        datasetPath))
+                        .name("MapSampler")
+                        .disableChaining();
 
         DataStream<NodeComputationGraph> compGraphs =
-                sampledNodes.flatMap(
-                        new FlatMapNodeToComputationGraph(
-                                maxNumNeighbors, depthOfCompGraph, datasetPath));
+                sampledNodes
+                        .flatMap(
+                                new FlatMapNodeToComputationGraph(
+                                        maxNumNeighbors, depthOfCompGraph, datasetPath))
+                        .name("MapToCG")
+                        .disableChaining();
 
-        DataStream<Row> rows = compGraphs.map(new MapComputationGraphToRow());
+        DataStream<Row> rows =
+                compGraphs.map(new MapComputationGraphToRow()).name("MapToRow").disableChaining();
 
         return rows;
     }
