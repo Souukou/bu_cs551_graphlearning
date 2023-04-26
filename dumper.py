@@ -100,7 +100,7 @@ class GraphDB:
         )
 
         if found:
-            if not data:
+            if data is None:
                 data = self.neighbordb.get(str(source).encode("UTF-8"))
             data = int(data.decode("UTF-8"))
         else:
