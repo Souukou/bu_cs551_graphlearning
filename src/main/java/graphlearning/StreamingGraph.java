@@ -13,6 +13,9 @@ import org.apache.flink.types.Row;
 
 import org.rocksdb.RocksDBException;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 /** StreamingGraph. */
@@ -38,6 +41,13 @@ public class StreamingGraph {
         conf.setString("metrics.latency.interval", "3000");
         conf.setString("metrics.latency.granularity", "operator");
 
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(propFile));
+        } catch (IOException ex) {
+            System.out.println("Error Reading Properties");
+        }
+
         if (pyScript.length() == 0) {
             throw new RuntimeException(String.format("%s value not specified", pyScript));
         }
@@ -49,7 +59,13 @@ public class StreamingGraph {
         InputStream inputObj = new InputStream();
         DataStream<Row> inputStream = inputObj.getStream(env, propFile);
         if ("train".equals(mode)) {
-            train(modelPath, epoch, statementSet, inputStream, pyScript, inputObj.datasetPath);
+            train(
+                    modelPath,
+                    epoch,
+                    statementSet,
+                    inputStream,
+                    pyScript,
+                    properties.getProperty("dataset.path"));
         }
     }
 
