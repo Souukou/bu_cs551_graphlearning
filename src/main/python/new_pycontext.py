@@ -35,28 +35,6 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         self.pyg_data = None
         self.nidx = 0
 
-        # delete this when rocksdb works
-        # from torch_geometric.datasets import Reddit
-        # path = '/tmp/reddit'
-        # dataset = Reddit(path)
-        # self.dataset_proxy = dataset[0]
-    # def __iter__(self) -> List[torch.Tensor]:
-    #     first_read = True
-    #     while True:
-    #         print("in the while loop")
-    #         try:
-    #             res = self.java_file.read(4, not first_read)
-    #             first_read = False
-    #             data_len, = struct.unpack("<i", res)
-    #             record = self.java_file.read(data_len, True).decode('utf-8')
-    #             tensors = self.parse_record(record)
-    #             print("yielding the tensor!")
-    #             yield tensors
-    #         except EOFError as error:
-    #             print("EOFError:", error)
-    #             break
-
-
     def read_label_and_features_rocksdb(self, node_id: int):
         value = self.node_db.get(str(node_id).encode("utf-8"))
         # print(value)
@@ -64,11 +42,7 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
             print("getting None value for node", str(node_id))
             return None, None
         label = int.from_bytes(value[:4], byteorder="big")
-        # print(node_id,label, len(value))
-        # print(len(value[4:]))
-        # print("value", value)
         features = torch.tensor(np.frombuffer(value[4:], np.dtype(np.float32)))
-        # print("features", features)
         return label, features
 
     def get_all_node_feats(self, edges: list):
@@ -89,12 +63,9 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         idn = 0
         for node in all_node_list:
             idn += 1
-            # print("getting the node:", node)
             label, feature = self.read_label_and_features_rocksdb(node)
-            # label, feature = self.dataset_proxy.y[node], self.dataset_proxy.x[node]
             labels.append(torch.tensor([label]))
             features.append(feature)
-            # features.append(torch.tensor([idn, node, label]))
         features = torch.stack(features)
         labels = torch.stack(labels)
         return labels, features, all_node_list
@@ -112,12 +83,9 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         idn = 0
         for node in all_node_list:
             idn += 1
-            # print("getting the node:", node)
-            # label, feature = self.read_label_and_features_rocksdb(node)
             label, feature = self.dataset_proxy.y[node], self.dataset_proxy.x[node]
             labels.append(label)
             features.append(feature)
-            # features.append([idn, node, label])
         features = torch.stack(features)
         return labels, features, all_node_list
     
@@ -132,8 +100,7 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
             new_edges[1][idn] = idx_map[edges[1][idn]]
         mask_all = [False for _ in range(len(all_node_list))]
         mask_all[0] = True
-        # mask_all = torch.tensor(mask_all)
-        # labels = [label]
+        
         new_data = PyG_Data(
             x=features,
             edge_index=new_edges,
@@ -142,11 +109,11 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
             val_mask=mask_all,
             test_mask=mask_all,
         )
-        # new_data = {'x': feats, 'edge_index': new_edges, 'y': label, 'mask_all': mask_all}
+        
         return new_data
     
     def decode_edge(self, edge_str):
-        # print("edge_str is", edge_str)
+        
         edge_strs = edge_str.split('|')
         edges = [[],[]]
         for estr in edge_strs:
@@ -156,48 +123,21 @@ class NewFlinkStreamDataset(FlinkStreamDataset):
         return edges
     
     def parse_record(self, record):
-        # print("entering the parsing part")
         self.nidx += 1
         with open('/opt/res.txt', 'w') as f:
           f.write(record)
-        # print("nidx", self.nidx)
         df = pd.read_csv(StringIO(record), names=["src", "edges"], encoding='utf8')
-        # print("the record is ",record)
-        # df.to_csv('/opt/res.csv') 
-        #df['embed'] = df['embed'].apply(lambda x: bytes.fromhex(x))
-        ############ For debugging only, remove this later ######################
-        # print("we are reading the sample data from the file")
-        df = pd.read_csv('/opt/graphlearning/sample_data.csv')
         self.input_types = ["INT_64", "INT_64", "INT_64", "FLOAT_32"]
-        # print(df.columns)
-        ############ For debugging only, remove this later ######################
-
         for idx, key in enumerate(["src", "edges"]):
             if key == 'src':
                 src = df[key][0]
-                # src = torch.from_numpy(np.array([df[key][0]])).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]])
             elif key == 'edges':
                 edges = self.decode_edge(df[key][0])
-                # edges = torch.from_numpy(edges).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]])
         labels, features, all_node_list = self.get_all_node_feats(edges)
-        # labels, features, all_node_list = self.get_all_node_feats_proxy(edges)
         labels = labels.to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[2]])
         features = features.to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[3]])
-        # all_node_list = torch.from_numpy(edges).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[0]])
         pyg_data = self.create_input(src, edges, labels, features, all_node_list)
-        pyg_data.nidx = self.nidx
 
-        # print("pyg data", pyg_data.nidx)
         return pyg_data
-        # if self.pyg_data is None:
-        #     self.pyg_data = pyg_data
-        # else:
-        #     print("use the same pyg data")
-        #     pyg_data = self.pyg_data
-        # print("pyg data", pyg_data)
-        # print("pyg data feature", pyg_data.x)
-        # print("pyg data edges", pyg_data.edge_index)
-        # print("pyg data label", pyg_data.y)
-        # print("any fucker?")
         
         
