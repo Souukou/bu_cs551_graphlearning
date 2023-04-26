@@ -1,4 +1,4 @@
-JOB_ID=$($FLINK_PATH/bin/flink run --detached target/GraphOperators.jar  | awk '/JobID/ {print $NF}')
+JOB_ID=$(flink run --detached -pyfs src/main/python target/GraphOperators.jar  --properties prop.config --pyscript src/main/python/train.py --model-path /tmp/linear/model | awk '/JobID/ {print $NF}')
 
 if [ -z "$JOB_ID" ]; then
     echo "Failed to extract job ID."
@@ -14,7 +14,7 @@ else
     echo "Directory $directory_path already exists."
 fi
 
-python "RetrieveThroughput.py" "$JOB_ID" &
-python "RetrieveLatency.py" "$JOB_ID" &
+python "metrics/RetrieveThroughput.py" "$JOB_ID" &
+python "metrics/RetrieveLatency.py" "$JOB_ID" &
 wait
 

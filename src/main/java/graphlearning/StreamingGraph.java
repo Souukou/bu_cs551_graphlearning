@@ -35,7 +35,7 @@ public class StreamingGraph {
         final Integer sampleCount = Integer.valueOf(params.get(SAMPLE_COUNT, "256000"));
         final String pyScript = params.get(PYSCRIPT, "");
         Configuration conf = new Configuration();
-        conf.setString("metrics.latency.interval", "30000");
+        conf.setString("metrics.latency.interval", "3000");
         conf.setString("metrics.latency.granularity", "operator");
 
         if (pyScript.length() == 0) {
@@ -71,6 +71,6 @@ public class StreamingGraph {
                         .build();
 
         GraphPyTorchUtils.train(statementSet, inputStream, config, epoch);
-        statementSet.execute().await();
+        statementSet.execute();
     }
 }

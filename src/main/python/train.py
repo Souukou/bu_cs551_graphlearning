@@ -39,7 +39,7 @@ def train(context: Context):
         writer = SummaryWriter(model_save_path+'_tsb')
     
     dataset = pytorch_context.get_dataset_from_flink()
-    data_loader = PyG_DataLoader(dataset, batch_size=4)
+    data_loader = PyG_DataLoader(dataset, batch_size=1)
 
     reddit_cofig = (301, 256, 41)
     kc_config = (34, 32, 4)

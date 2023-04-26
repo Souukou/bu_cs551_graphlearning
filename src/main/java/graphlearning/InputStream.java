@@ -41,6 +41,7 @@ class InputStream {
 
         RateCtrlKafkaEventDeserializer rateCtrlSchema =
                 new RateCtrlKafkaEventDeserializer(maxRatePerSecond);
+        KafkaEventDeserializer deseralizer = new KafkaEventDeserializer();
 
         // create a Kafka consumer
         KafkaSource<Event> source =
@@ -48,7 +49,7 @@ class InputStream {
                         .setBootstrapServers(properties.getProperty("bootstrap.servers"))
                         .setTopics(properties.getProperty("topic.id"))
                         .setStartingOffsets(OffsetsInitializer.earliest())
-                        .setValueOnlyDeserializer(new KafkaEventDeserializer())
+                        .setValueOnlyDeserializer(rateCtrlSchema)
                         .build();
 
         DataStream<Event> kafkaStream =
