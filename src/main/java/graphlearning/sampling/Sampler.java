@@ -31,9 +31,11 @@ public class Sampler extends RichMapFunction<List<Edge>, List<Integer>> {
     private final Integer numOfSamples;
     private HashSet<Integer> oldNodes;
     RocksDBWriter dbWriter;
+    private String datasetPath;
 
-    public Sampler(Integer numOfSamples, String initialNodesPath) {
+    public Sampler(Integer numOfSamples, String initialNodesPath, String datasetPath) {
         this.numOfSamples = numOfSamples;
+        this.datasetPath = datasetPath;
         System.out.println("Test 1");
         Gson gson = new Gson();
         System.out.println("Test 2");
@@ -54,7 +56,7 @@ public class Sampler extends RichMapFunction<List<Edge>, List<Integer>> {
     public void open(org.apache.flink.configuration.Configuration parameters) throws Exception {
         super.open(parameters);
 
-        dbWriter = new RocksDBWriter();
+        dbWriter = new RocksDBWriter(this.datasetPath);
     }
 
     @Override

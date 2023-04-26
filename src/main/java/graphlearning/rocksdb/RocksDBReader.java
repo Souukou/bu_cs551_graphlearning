@@ -23,6 +23,12 @@ public class RocksDBReader {
     private RocksDB nodeDb;
     private RocksDB edgeDb;
 
+    /** RocksDBReader with only dataset root. */
+    public RocksDBReader(String dbPath) {
+        this.nodeDbPath = dbPath + "/nodes.db";
+        this.edgeDbPath = dbPath + "/edges.db";
+    }
+
     /**
      * RocksDBReader constructor with costomized node and edges.db path.
      *

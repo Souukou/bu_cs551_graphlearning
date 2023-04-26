@@ -34,6 +34,7 @@ class InputStream {
                 maxTrainingSamples = Integer.parseInt(properties.getProperty("reservoir.size")),
                 depthOfCompGraph = Integer.parseInt(properties.getProperty("compgraph.depth"));
         int windowSize = 10;
+        String datasetPath = properties.getProperty("dataset.path");
 
         // create a Kafka consumer
         KafkaSource<Event> source =
@@ -57,11 +58,13 @@ class InputStream {
                 windowed.map(
                         new Sampler(
                                 maxTrainingSamples,
-                                "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json"));
+                                "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json",
+                                datasetPath));
 
         DataStream<NodeComputationGraph> compGraphs =
                 sampledNodes.flatMap(
-                        new FlatMapNodeToComputationGraph(maxNumNeighbors, depthOfCompGraph));
+                        new FlatMapNodeToComputationGraph(
+                                maxNumNeighbors, depthOfCompGraph, datasetPath));
 
         DataStream<Row> rows = compGraphs.map(new MapComputationGraphToRow());
 

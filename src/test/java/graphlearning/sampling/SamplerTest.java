@@ -20,7 +20,7 @@ class SamplerTest {
         int numOfSamples = 10;
         // If path doesn't exist, we assume the initial nodes to be an empty list
         String initialNodesPath = "";
-        sampler = new Sampler(numOfSamples, initialNodesPath);
+        sampler = new Sampler(numOfSamples, initialNodesPath, "dataset-test");
         try {
             sampler.open(new Configuration());
         } catch (Exception e) {
