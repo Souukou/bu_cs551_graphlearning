@@ -1,5 +1,7 @@
 import argparse
+import collections
 import datetime
+import json
 import pathlib
 
 import kafka
@@ -7,16 +9,19 @@ import numpy as np
 import rocksdb
 import torch_geometric
 import tqdm
-
 from protobuf import event_pb2
 
 
 def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--pretrained", required=True, type=pathlib.Path)
-    parser.add_argument("-k", "--to-kafka", action="store_true", default=False, dest="tokafka")
+    parser.add_argument(
+        "-k", "--to-kafka", action="store_true", default=False, dest="tokafka"
+    )
+    parser.add_argument("-m", "--mode", default="train")
     parser.add_argument("-s", "--savedir", default="dataset-test")
     parser.add_argument("-t", "--topic", default="test")
+    parser.add_argument("-n", "--neighbor-path", default="neighbors.json")
     parser.add_argument("--servers", default=["localhost:9092"], nargs="+", type=str)
     return parser
 
@@ -25,10 +30,15 @@ class OrderByCount(rocksdb.interfaces.Comparator):
     def compare(self, left, right):
         s0, t0 = left.decode("UTF-8").split("|")
         s1, t1 = right.decode("UTF-8").split("|")
-        if int(t0) < int(t1):
+        if int(s0) < int(s1):
             return -1
-        if int(t1) > int(t0):
+        if int(s0) > int(s1):
             return 1
+        if int(s0) == int(s1):
+            if int(t0) < int(t1):
+                return -1
+            if int(t1) > int(t0):
+                return 1
         return 0
 
     def name(self):
@@ -68,27 +78,16 @@ class GraphDB:
             block_cache_compressed=rocksdb.LRUCache(500 * (1024**2)),
         )
         if edges:
-          opts.comparator = OrderByCount()
+            opts.comparator = OrderByCount()
         return opts
 
     def disconnected_nodes_so_far(self):
         return self._nodes
 
     def edge_exists(self, source, target):
-        key = f"{source}|0".encode("UTF-8")
-        if not self.edgesdb.key_may_exist(key)[0]:
+        neighbors = self.get_neighbors(source)
+        if not neighbors:
             return False
-        iterator = self.edgesdb.iteritems()
-        iterator.seek(key)
-        neighbors = set()
-        s = t = -1
-        for k, v in iterator:
-            s = int(k.decode("UTF-8").split("|")[0])
-            t = int(v.decode("UTF-8"))
-            if s != source:
-                break
-            neighbors.add((s, t))
-            neighbors.add((t, s))
         if (source, target) in neighbors or (target, source) in neighbors:
             return True
 
@@ -146,15 +145,36 @@ class GraphDB:
         self.insert_node(target, target_feat, target_label)
         self.insert_edge(source, target)
 
+    def get_neighbors(self, source):
+        key = f"{source}|0".encode("UTF-8")
+        if not self.edgesdb.key_may_exist(key)[0]:
+            return set()
+        iterator = self.edgesdb.iteritems()
+        iterator.seek(key)
+        neighbors = set()
+        s = t = -1
+        for k, v in iterator:
+            s = int(k.decode("UTF-8").split("|")[0])
+            t = int(v.decode("UTF-8"))
+            if s != source:
+                break
+            neighbors.add((s, t))
+            neighbors.add((t, s))
+        return neighbors
+
 
 class DumpToKafka:
-    def __init__(self, servers, topic):
+    def __init__(self, servers, topic, mode="train"):
+        print(f"Trying connect to kafka servers: {servers} for topic: {topic}", end=" ")
         self.producer = kafka.KafkaProducer(
             bootstrap_servers=servers, value_serializer=lambda x: x.SerializeToString()
         )
+        print("Connected!")
         self._topic = topic
+        self._mode = mode
 
-    def dump(self, source, target, labels, feats):
+    def dump_train(self, source, target, labels, feats):
+        assert self._mode == "train"
         event = event_pb2.Event()
         event.timestamp.FromDatetime(datetime.datetime.now())
         event.source = source
@@ -171,33 +191,57 @@ def main(
     pretrained_graph_path,
     savedir="dataset-test",
     tokafka=False,
+    mode="train",
     kafka_topic="test",
     bootstrap_servers=["localhost:9092"],
+    neighbor_path="neighbors.json",
 ):
     assert pretrained_graph_path.exists()
+    print("Loading Data")
     pretrained_graph = np.load(str(pretrained_graph_path), allow_pickle=True)[()]
-    pretrained_graph = pretrained_graph["pt_mask"]
-    # dataset = torch_geometric.datasets.Reddit("/tmp/reddit")[0]
     dataset = torch_geometric.datasets.KarateClub()[0]
 
-    if not tokafka:
-      graphdb = GraphDB(dataset.num_nodes, savedir)
-    else:
-      kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic)
+    print("Converting data to primitives for faster access...", end=" ")
+    pt_edges = set(zip(*pretrained_graph["pt_edges"]))
+    eis = dataset.edge_index.tolist()
+    train_mask = dataset.train_mask.tolist()
+    num_edges = dataset.num_edges
+    pretrained_graph = pretrained_graph["pt_mask"].tolist()
+    allfeats = dataset.x.numpy()#byterizer(dataset.x.numpy()).tolist()
+    alllabels = dataset.y.tolist()
+    print("Done!")
 
-    for idx in tqdm.tqdm(range(dataset.num_edges)):
-        source, target = sorted(list(dataset.edge_index[:, idx].numpy()))
-        feats = [dataset.x[source].numpy(), dataset.x[target].numpy()]
-        labels = [dataset.y[source].numpy(), dataset.y[target].numpy()]
-        if (not tokafka) and pretrained_graph[source] and pretrained_graph[target]:
+    if mode == "train" and not tokafka:
+        graphdb = GraphDB(dataset.num_nodes, savedir)
+        for source, target in tqdm.tqdm(pt_edges):
+            feats = [allfeats[source], allfeats[target]]
+            labels = [alllabels[source], alllabels[target]]
             graphdb.insert(source, target, feats, labels)
-        elif tokafka:
-            kafkadumper.dump(
-                source,
-                target,
-                dataset.y[[source, target]].numpy(),
-                dataset.x[[source, target]].numpy(),
-            )
+
+        nodes_so_far = list(graphdb.disconnected_nodes_so_far())
+        for node in tqdm.tqdm(nodes_so_far):
+          feat = allfeats[source]
+          label = alllabels[source]
+          graphdb.insert_node(node, feat, label)
+
+    if tokafka:
+        kafkadumper = DumpToKafka(bootstrap_servers, kafka_topic, mode)
+        graphdb = GraphDB(dataset.num_nodes, savedir, mode == "infer")
+        for idx in tqdm.tqdm(range(num_edges)):
+            source, target = eis[0][idx], eis[1][idx]
+            if (
+                train_mask[source]
+                and train_mask[target]
+                and (source, target) not in pt_edges
+                and (target, source) not in pt_edges
+            ):
+                if mode == "train":
+                    kafkadumper.dump_train(
+                        source,
+                        target,
+                        dataset.y[[source, target]].numpy(),
+                        dataset.x[[source, target]].numpy(),
+                    )
 
 
 if __name__ == "__main__":
@@ -206,6 +250,8 @@ if __name__ == "__main__":
         args.pretrained,
         args.savedir,
         args.tokafka,
+        args.mode,
         args.topic,
         args.servers,
+        args.neighbor_path,
     )
