@@ -21,14 +21,16 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
+import java.io.FileInputStream;
+
 
 class InputStream {
     DataStream<Row> getStream(StreamExecutionEnvironment env) {
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream("prop.config"));
-        } catch (IOException ex) {
-            System.out.println("Error Reading Properties");
+          properties.load(new FileInputStream("prop.config"));
+        }catch(IOException ex) {
+          System.out.println("Error Reading Properties");
         }
         properties.setProperty("bootstrap.servers", "rise.bu.edu:9092");
         properties.setProperty("topic.id", "test");
@@ -51,7 +53,7 @@ class InputStream {
         DataStream<Edge> edgeStream = kafkaStream.map(new MapEventToEdge());
 
         DataStream<List<Edge>> windowed =
-                edgeStream.countWindowAll(windowSize).aggregate(new AggregateToList());
+                edgeStream.countWindowAll(properties.getProperty("window.size")).aggregate(new AggregateToList());
 
         DataStream<List<Integer>> sampledNodes =
                 windowed.map(
