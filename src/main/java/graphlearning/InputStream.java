@@ -17,15 +17,24 @@ import graphlearning.types.Edge;
 import graphlearning.types.NodeComputationGraph;
 import graphlearning.window.AggregateToList;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 
 class InputStream {
     DataStream<Row> getStream(StreamExecutionEnvironment env) {
         Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("prop.config"));
+        } catch (IOException ex) {
+            System.out.println("Error Reading Properties");
+        }
         properties.setProperty("bootstrap.servers", "rise.bu.edu:9092");
         properties.setProperty("topic.id", "test");
-        int maxNumNeighbors = 2, maxTrainingSamples = 10, depthOfCompGraph = 3;
+        Integer maxNumNeighbors = Integer.parseInt(properties.getProperty("neighbors.num")),
+                maxTrainingSamples = Integer.parseInt(properties.getProperty("reservoir.size")),
+                depthOfCompGraph = Integer.parseInt(properties.getProperty("compgraph.depth"));
         int windowSize = 10;
 
         // create a Kafka consumer
@@ -51,7 +60,8 @@ class InputStream {
                                 "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json"));
 
         DataStream<NodeComputationGraph> compGraphs =
-                sampledNodes.flatMap(new FlatMapNodeToComputationGraph(maxNumNeighbors));
+                sampledNodes.flatMap(
+                        new FlatMapNodeToComputationGraph(maxNumNeighbors, depthOfCompGraph));
 
         DataStream<Row> rows = compGraphs.map(new MapComputationGraphToRow());
 

@@ -1,9 +1,7 @@
 package graphlearning.rocksdb;
 
 import org.rocksdb.ComparatorOptions;
-import org.rocksdb.FlushOptions;
 import org.rocksdb.Options;
-
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 import org.rocksdb.RocksIterator;
