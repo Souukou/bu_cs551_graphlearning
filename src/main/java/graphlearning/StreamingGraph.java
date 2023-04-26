@@ -22,12 +22,13 @@ public class StreamingGraph {
     private static final String SAMPLE_COUNT = "sample-count";
     private static final String MODE = "mode";
     private static final String PYSCRIPT = "pyscript";
+    private static final String PROP_FILE = "properties";
 
     public static void main(String[] args)
             throws ExecutionException, InterruptedException, RocksDBException {
         final MultipleParameterTool params = MultipleParameterTool.fromArgs(args);
         final String mode = params.get(MODE, "train");
-
+        final String propFile = params.get(PROP_FILE, "prop.config");
         final String modelPath =
                 params.get(MODEL_PATH, String.format("/tmp/linear/%s", System.currentTimeMillis()));
         final Integer epoch = Integer.valueOf(params.get(EPOCH, "1"));
@@ -46,7 +47,7 @@ public class StreamingGraph {
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         final StreamStatementSet statementSet = tEnv.createStatementSet();
 
-        DataStream<Row> inputStream = new InputStream().getStream(env);
+        DataStream<Row> inputStream = new InputStream().getStream(env, propFile);
         if ("train".equals(mode)) {
             train(modelPath, epoch, statementSet, inputStream, pyScript);
         }
