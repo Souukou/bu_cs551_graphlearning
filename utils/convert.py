@@ -14,7 +14,7 @@ def build_parser():
 def main(argv):
     dictionary = np.load(argv.npfile, allow_pickle=True)[()]
 
-    dictionary["pt_nodes"] = []
+    dictionary["ptNodes"] = []
 
     for i in tqdm.tqdm(range(len(dictionary["pt_mask"]))):
         if dictionary["pt_mask"][i]:

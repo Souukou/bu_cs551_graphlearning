@@ -1,6 +1,6 @@
 import torch
 from torch_geometric.utils import subgraph, k_hop_subgraph
-from torch_geometric.datasets import Reddit
+from torch_geometric.datasets import Reddit, KarateClub
 from torch_geometric.loader import NeighborLoader
 from torch_geometric.loader import DataLoader as PyG_DataLoader
 import copy
@@ -23,7 +23,9 @@ def pre_train(epoch, model, optimizer, train_loader, device):
         # print("batch", torch.sum(train_loader.data.train_mask))
         # print("batch index!!!", torch.unique(batch.edge_index))
         # print(batch.edge_index)
-        # print(batch.x)
+        print(batch.x)
+        print(batch.x.shape)
+        print(batch.x.dtype)
         # print(batch.n_id)
         # print(batch.train_mask)
         # input()
@@ -65,14 +67,18 @@ def pre_test(model, test_loader, device):
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
-path = './reddit/'
-dataset = Reddit(path)
+path = './dataset'
+dataset = KarateClub()
+print(dataset)
 data = dataset[0]
 
-train_feats = data.x[data.train_mask]
+# train_feats = data.x[data.train_mask]
+print(data.train_mask)
 train_idxs = np.arange(data.num_nodes)[data.train_mask].tolist()
 
 new_idx = train_idxs[:len(train_idxs)//2]
+print(new_idx)
+print(data.x.shape)
 
 edge_index = data.edge_index
 new_edge_index, _ = subgraph(new_idx, edge_index)
@@ -89,7 +95,7 @@ new_data.edge_index = new_edge_index
 new_data.train_mask = new_train_mask
 
 pretrain_dict = {'pt_edges':new_edge_index.numpy(), "pt_mask": new_train_mask.numpy()}
-pt_dict = './reddit/pretrain_dict.npy'
+pt_dict = './dataset/pretrain_dict.npy'
 print("not saving new numpy dicts")
 # print("saving the the pretrained dict to", pt_dict)
 # np.save(pt_dict, pretrain_dict)
@@ -99,14 +105,14 @@ kwargs = {'batch_size': 4}
 sub_train_loader = NeighborLoader(new_data, input_nodes=new_data.train_mask,
                                  num_neighbors=[2, 2], shuffle=True, **kwargs)
 
-test_loader = NeighborLoader(data, num_neighbors=[-1],input_nodes=data.test_mask, shuffle=False, **kwargs)
+# test_loader = NeighborLoader(data, num_neighbors=[-1],input_nodes=data.test_mask, shuffle=False, **kwargs)
 
-model = GS_model(dataset.num_features, 256, dataset.num_classes, 2).to(device)
+model = GS_model(34, 32, 4, 2).to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 for epoch in range(30):
     loss, acc = pre_train(epoch, model, optimizer, sub_train_loader, device)
     print("loss and acc", loss, acc)
-
-print("test acc", pre_test(model, test_loader, device))
-torch.save(model.state_dict(), './reddit/pretrianed_graph_sage.pth')
+print(dataset.num_features, dataset.num_classes)
+# print("test acc", pre_test(model, test_loader, device))
+torch.save(model.state_dict(), './dataset/pretrianed_graph_sage.pth')

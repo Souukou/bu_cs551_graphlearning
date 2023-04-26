@@ -10,8 +10,8 @@ def decode_edge(edge_str):
         edges[0] += [node1, node2]
         edges[1] += [node2, node1]
     return edges
-        
-df = pd.read_csv('/opt/graphlearning/example/sample_data.csv')
+
+df = pd.read_csv('/opt/src/main/python/python_only_test/sample_data.csv')
 for idx, key in enumerate(["src", "edges"]):
     print(key, df[key][0].__class__)
     if key == "edges":

@@ -1,6 +1,6 @@
 package graphlearning.sampling;
 
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichMapFunction;
 
 import com.google.gson.Gson;
 import graphlearning.helper.RandomNumbers;
@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Sampler. */
-public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
+public class Sampler extends RichMapFunction<List<Edge>, List<Integer>> {
 
     /**
      * The reservoir stores "old" nodes of the graph so that we do not suffer from the "catastrophic
@@ -30,6 +30,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
 
     private final Integer numOfSamples;
     private HashSet<Integer> oldNodes;
+    RocksDBWriter dbWriter;
 
     public Sampler(Integer numOfSamples, String initialNodesPath) {
         this.numOfSamples = numOfSamples;
@@ -38,6 +39,7 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         System.out.println("Test 2");
         try {
             Reader reader = new FileReader(initialNodesPath);
+            System.out.println(initialNodesPath);
             oldNodes = new HashSet<Integer>(gson.fromJson(reader, Nodes.class).getPtNodes());
         } catch (IOException e) {
             System.out.println("No initial nodes provided. Using empty reservoir.");
@@ -49,9 +51,15 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
     }
 
     @Override
+    public void open(org.apache.flink.configuration.Configuration parameters) throws Exception {
+        super.open(parameters);
+
+        dbWriter = new RocksDBWriter();
+    }
+
+    @Override
     public List<Integer> map(List<Edge> edges) {
         // find nodes list
-        RocksDBWriter dbWriter = new RocksDBWriter();
         Set<Integer> nodeSet = new HashSet<Integer>();
 
         edges.stream()
@@ -107,7 +115,8 @@ public class Sampler implements MapFunction<List<Edge>, List<Integer>> {
         sampledNodes.addAll(newSamples);
         sampledNodes.addAll(oldSamples);
 
-        dbWriter.finalize();
+        dbWriter.flushNode();
+
         return sampledNodes;
     }
 

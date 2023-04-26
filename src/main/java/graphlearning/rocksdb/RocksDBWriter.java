@@ -1,8 +1,6 @@
 package graphlearning.rocksdb;
 
-import org.rocksdb.BlockBasedTableConfig;
-import org.rocksdb.BloomFilter;
-import org.rocksdb.LRUCache;
+import org.rocksdb.ComparatorOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -79,22 +77,15 @@ public class RocksDBWriter {
             RocksDB.loadLibrary();
             Options options = new Options();
             options.setCreateIfMissing(true);
-
-            LRUCache cache = new LRUCache(2L * 1024 * 1024 * 1024);
-            LRUCache cacheCompressed = new LRUCache(500 * 1024 * 1024);
-            options.setTableFormatConfig(
-                    new BlockBasedTableConfig()
-                            .setFilter(new BloomFilter(10, false))
-                            .setBlockCache(cache)
-                            .setBlockCacheCompressed(cacheCompressed));
-            options.setMaxOpenFiles(300000);
-            options.setWriteBufferSize(67108864);
-            options.setMaxWriteBufferNumber(3);
-            options.setTargetFileSizeBase(67108864);
-
-            nodeDb = RocksDB.open(options, nodeDbPath);
-            edgeDb = RocksDB.open(options, edgeDbPath);
+            // nodeDb = RocksDB.open(options, nodeDbPath);
             neighborDb = RocksDB.open(options, neighborPath);
+
+            Options options2 = new Options();
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            options2.setCreateIfMissing(true);
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            edgeDb = RocksDB.open(options2, edgeDbPath);
+
         } catch (RocksDBException e) {
             e.printStackTrace();
         }
@@ -136,13 +127,14 @@ public class RocksDBWriter {
      * @param feature query node's embedding bytes
      */
     public void insertNode(Integer nodeId, byte[] feature) {
-        try {
-            byte[] keyByte = Integer.toString(nodeId).getBytes();
-            byte[] valueByte = feature;
-            nodeDb.put(keyByte, valueByte);
-        } catch (RocksDBException e) {
-            e.printStackTrace();
-        }
+        return;
+        //        try {
+        //            byte[] keyByte = Integer.toString(nodeId).getBytes();
+        //            byte[] valueByte = feature;
+        //            nodeDb.put(keyByte, valueByte);
+        //        } catch (RocksDBException e) {
+        //            e.printStackTrace();
+        //        }
     }
 
     /**
@@ -178,8 +170,20 @@ public class RocksDBWriter {
         }
     }
 
+    public void flushNode() {
+        //        try {
+        //            FlushOptions flushOptions = new FlushOptions();
+        //            flushOptions.setWaitForFlush(true);
+        //            // flush then return
+        //            nodeDb.flush(flushOptions);
+        //        } catch (RocksDBException e) {
+        //            e.printStackTrace();
+        //            System.out.println("flush node db failed");
+        //        }
+    }
+
     public void finalize() {
-        nodeDb.close();
+        // nodeDb.close();
         edgeDb.close();
         neighborDb.close();
     }

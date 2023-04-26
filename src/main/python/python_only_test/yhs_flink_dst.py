@@ -51,11 +51,13 @@ class TestFlinkParser:
         # self.assertEqual(1, 1)
         labels, features, all_node_list = parser.parse_record(edges)
         for label, feat, node in zip(labels, features, all_node_list):
-            print(label, feat, node)
+            # print(label, feat, node)
+            print("label shape", label)
+            print("feat shape", feat.shape)
 
 
 class FlinkStreamDataset:
-    def __init__(self, nodeDb="/opt/graphlearning/example/node.db") -> None:
+    def __init__(self, nodeDb="/opt/dataset-test/nodes.db") -> None:
         opts = rocksdb.Options()
         self.node_db = rocksdb.DB(nodeDb, opts, read_only=True)
 
@@ -68,7 +70,7 @@ class FlinkStreamDataset:
         label = int.from_bytes(value[:4], byteorder="big")
         print(node_id,label, len(value))
         print(len(value[4:]))
-        features = torch.tensor(np.frombuffer(value[4:], np.dtype(int)))
+        features = torch.tensor(np.frombuffer(value[4:]))
         print(len(features))
         return label, features
 
@@ -85,7 +87,7 @@ class FlinkStreamDataset:
         for node in all_node_list:
             print("getting the node:", node)
             label, feature = self.read_label_and_features_rocksdb(node)
-            labels.append((node, label))
+            labels.append(label)
             features.append(feature)
         features = torch.stack(features)
         return labels, features, all_node_list
