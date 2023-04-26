@@ -4,6 +4,7 @@ import org.flinkextended.flink.ml.pytorch.PyTorchClusterConfig;
 import org.flinkextended.flink.ml.util.MLConstants;
 
 import org.apache.flink.api.java.utils.MultipleParameterTool;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.bridge.java.StreamStatementSet;
@@ -32,12 +33,15 @@ public class StreamingGraph {
         final Integer epoch = Integer.valueOf(params.get(EPOCH, "1"));
         final Integer sampleCount = Integer.valueOf(params.get(SAMPLE_COUNT, "256000"));
         final String pyScript = params.get(PYSCRIPT, "");
+        Configuration conf = new Configuration();
+        conf.setString("metrics.latency.interval", "30000");
+        conf.setString("metrics.latency.granularity", "operator");
 
         if (pyScript.length() == 0) {
             throw new RuntimeException(String.format("%s value not specified", pyScript));
         }
 
-        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment(conf);
         env.setParallelism(1);
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         final StreamStatementSet statementSet = tEnv.createStatementSet();
