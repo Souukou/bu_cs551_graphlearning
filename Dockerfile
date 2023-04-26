@@ -27,5 +27,6 @@ RUN sed -i.bak 's/taskmanager.numberOfTaskSlots: 1/taskmanager.numberOfTaskSlots
 RUN git clone --recursive https://www.github.com/flink-extended/dl-on-flink /tmp/dl-on-flink && pip install /tmp/dl-on-flink/dl-on-flink-framework/python /tmp/dl-on-flink/dl-on-flink-pytorch/python && rm -rf /tmp/dl-on-flink
 RUN apt-get install -y vim && sed -i "s/^#\(listeners=.*$\)/\1/" "${KAFKA_HOME}/config/server.properties"
 RUN printf "#\041/bin/bash\nnohup ${KAFKA_HOME}/bin/zookeeper-server-start.sh ${KAFKA_HOME}/config/zookeeper.properties &> /tmp/zookeeper.log & nohup ${KAFKA_HOME}/bin/kafka-server-start.sh ${KAFKA_HOME}/config/server.properties &> /tmp/server.log & sleep infinity" > $HOME/start_kafka.sh && chmod +x $HOME/start_kafka.sh
+RUN pip3 install tensorboardX filelock
 WORKDIR /opt
 ENTRYPOINT ["/root/start_kafka.sh"]
