@@ -39,6 +39,7 @@ public class Sampler extends RichMapFunction<List<Edge>, List<Integer>> {
         System.out.println("Test 2");
         try {
             Reader reader = new FileReader(initialNodesPath);
+            System.out.println(initialNodesPath);
             oldNodes = new HashSet<Integer>(gson.fromJson(reader, Nodes.class).getPtNodes());
         } catch (IOException e) {
             System.out.println("No initial nodes provided. Using empty reservoir.");

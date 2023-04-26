@@ -51,9 +51,9 @@ public class RocksDBReader {
     private void open() {
         try {
             nodeDb = RocksDB.openReadOnly(nodeDbPath);
+
             Options options2 = new Options();
             ComparatorOptions comparatorOptions = new ComparatorOptions();
-            options2.setCreateIfMissing(true);
             options2.setComparator(new OrderByCountComparator(comparatorOptions));
             edgeDb = RocksDB.openReadOnly(options2, edgeDbPath);
         } catch (RocksDBException e) {

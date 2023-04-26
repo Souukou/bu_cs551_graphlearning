@@ -1,5 +1,8 @@
 from io import StringIO
 
+import struct
+from typing import List, Mapping
+
 import numpy as np
 import pandas as pd
 import torch
@@ -11,120 +14,190 @@ from dl_on_flink_pytorch.flink_stream_dataset import (
 from dl_on_flink_pytorch.pytorch_context import PyTorchContext
 from torch_geometric.data import Data as PyG_Data
 
+import rocksdb
+from typing import Tuple
+
 
 class NewPyTorchContext(PyTorchContext):
-    def get_dataset_from_flink(self) -> FlinkStreamDataset:
+    def get_dataset_from_flink(self, nodeDb = "dataset-test/nodes.db") -> FlinkStreamDataset:
         """
         Get the data loader to read data from Flink.
         """
-        return NewFlinkStreamDataset(self)
-
+        print("getting the node db", nodeDb)
+        return NewFlinkStreamDataset(self, nodeDb)
 
 class NewFlinkStreamDataset(FlinkStreamDataset):
-    def __init__(self, context: Context):
+    def __init__(self, context: Context, nodeDb = "dataset-test/nodes.db"):
         super(NewFlinkStreamDataset, self).__init__(context)
-        # get the byte length here
-        # self.byte_len = int(self.pytorch_context.get_property('BYTE_LEN'))
+        opts = rocksdb.Options()
+        # print("rocksdb opts", opts)
+        self.node_db = rocksdb.DB(nodeDb, opts, read_only=True)
+        self.pyg_data = None
+        self.nidx = 0
 
-    def decoding_features(self, feats_str):
-        print("feats_str:", feats_str.__class__)
-        print(("length and node num", len(feats_str), self.node_num))
-        assert len(feats_str) % self.node_num == 0
-        self.byte_len = len(feats_str) // self.node_num
-        feat_strs = [
-            feats_str[i * self.byte_len : (i + 1) * self.byte_len]
-            for i in range(self.node_num)
-        ]
-        # modify this to decode the feat
-        feats = [np.frombuffer(feat_str, np.dtype(int)) for feat_str in feat_strs]
-        return feats
+        # delete this when rocksdb works
+        # from torch_geometric.datasets import Reddit
+        # path = '/tmp/reddit'
+        # dataset = Reddit(path)
+        # self.dataset_proxy = dataset[0]
+    # def __iter__(self) -> List[torch.Tensor]:
+    #     first_read = True
+    #     while True:
+    #         print("in the while loop")
+    #         try:
+    #             res = self.java_file.read(4, not first_read)
+    #             first_read = False
+    #             data_len, = struct.unpack("<i", res)
+    #             record = self.java_file.read(data_len, True).decode('utf-8')
+    #             tensors = self.parse_record(record)
+    #             print("yielding the tensor!")
+    #             yield tensors
+    #         except EOFError as error:
+    #             print("EOFError:", error)
+    #             break
 
-    def decoding_neighbors(self, feats_str):
-        if isinstance(feats_str, np.int64):
-            neighbor_ls = [feats_str.item()]
-        else:
-            feat_str_ls = feats_str.split("-")
-            neighbor_ls = list(map(int, feat_str_ls))
-            # neighbor_ls = map(int, feats_str.split(','))
-            # print(feat_str_ls, neighbor_ls)
-        self.node_num = len(neighbor_ls) + 1
-        return neighbor_ls
 
-    def decoding_single(self, feats_str):
-        return int(feats_str.decode("utf-8"))
-        # return int(feats_str)
+    def read_label_and_features_rocksdb(self, node_id: int):
+        value = self.node_db.get(str(node_id).encode("utf-8"))
+        # print(value)
+        if value is None:
+            print("getting None value for node", str(node_id))
+            return None, None
+        label = int.from_bytes(value[:4], byteorder="big")
+        # print(node_id,label, len(value))
+        # print(len(value[4:]))
+        # print("value", value)
+        features = torch.tensor(np.frombuffer(value[4:], np.dtype(np.float32)))
+        # print("features", features)
+        return label, features
 
-    def create_input(self, data_step):
-        src, nbrs, label, feats = data_step
-        # print("src shape", src.shape)
-        # print("nbrs shape", nbrs.shape)
-        # print("label shape", label.shape)
-        # print("feats shape", feats.shape)
-        idx_map = {src.item(): 0}
-        for idn in range(len(nbrs)):
-            idx_map[nbrs[idn].item()] = idn + 1
-        new_edges = torch.zeros((2, len(nbrs))).long()
-        for idn in range(len(nbrs)):
-            new_edges[1][idn] = idx_map[nbrs[idn].item()]
-        # new_edges, label, feats
-        mask_all = torch.tensor([0]).long()
+    def get_all_node_feats(self, edges: list):
+        all_nodes = set()
+        for node in edges[0]:
+            all_nodes.add(node)
+
+    def get_all_node_feats(self, edges: list):
+        all_nodes = set()
+        for node in edges[0]:
+            all_nodes.add(node)
+
+        all_node_list = list(all_nodes)
+        all_node_list.sort()
+
+        labels = []
+        features = []
+        idn = 0
+        for node in all_node_list:
+            idn += 1
+            # print("getting the node:", node)
+            label, feature = self.read_label_and_features_rocksdb(node)
+            # label, feature = self.dataset_proxy.y[node], self.dataset_proxy.x[node]
+            labels.append(torch.tensor([label]))
+            features.append(feature)
+            # features.append(torch.tensor([idn, node, label]))
+        features = torch.stack(features)
+        labels = torch.stack(labels)
+        return labels, features, all_node_list
+    
+    def get_all_node_feats_proxy(self, edges: list):
+        all_nodes = set()
+        for node in edges[0]:
+            all_nodes.add(node)
+
+        all_node_list = list(all_nodes)
+        all_node_list.sort()
+
+        labels = []
+        features = []
+        idn = 0
+        for node in all_node_list:
+            idn += 1
+            # print("getting the node:", node)
+            # label, feature = self.read_label_and_features_rocksdb(node)
+            label, feature = self.dataset_proxy.y[node], self.dataset_proxy.x[node]
+            labels.append(label)
+            features.append(feature)
+            # features.append([idn, node, label])
+        features = torch.stack(features)
+        return labels, features, all_node_list
+    
+    def create_input(self, src, edges, labels, features, all_node_list):
+        
+        idx_map = {src.item():0}
+        for idn in range(len(all_node_list)):
+            idx_map[all_node_list[idn]] = idn
+        new_edges = torch.zeros((2, len(edges[0]))).long()
+        for idn in range(len(edges[0])):
+            new_edges[0][idn] = idx_map[edges[0][idn]]
+            new_edges[1][idn] = idx_map[edges[1][idn]]
+        mask_all = [False for _ in range(len(all_node_list))]
+        mask_all[0] = True
+        # mask_all = torch.tensor(mask_all)
         # labels = [label]
         new_data = PyG_Data(
-            x=feats,
+            x=features,
             edge_index=new_edges,
-            y=label,
+            y=labels,
             train_mask=mask_all,
             val_mask=mask_all,
             test_mask=mask_all,
         )
         # new_data = {'x': feats, 'edge_index': new_edges, 'y': label, 'mask_all': mask_all}
         return new_data
-
+    
+    def decode_edge(self, edge_str):
+        # print("edge_str is", edge_str)
+        edge_strs = edge_str.split('|')
+        edges = [[],[]]
+        for estr in edge_strs:
+            node1, node2 = list(map(int, estr.split('-')))
+            edges[0] += [node1, node2]
+            edges[1] += [node2, node1]
+        return edges
+    
     def parse_record(self, record):
+        # print("entering the parsing part")
+        self.nidx += 1
         with open('/opt/res.txt', 'w') as f:
           f.write(record)
+        # print("nidx", self.nidx)
         df = pd.read_csv(StringIO(record), names=["src", "edges"], encoding='utf8')
-        print(record)
-        df.to_csv('/opt/res.csv') 
+        # print("the record is ",record)
+        # df.to_csv('/opt/res.csv') 
         #df['embed'] = df['embed'].apply(lambda x: bytes.fromhex(x))
         ############ For debugging only, remove this later ######################
         # print("we are reading the sample data from the file")
-        # df = pd.read_csv('/opt/graphlearning/sample_data.csv')
+        df = pd.read_csv('/opt/graphlearning/sample_data.csv')
         self.input_types = ["INT_64", "INT_64", "INT_64", "FLOAT_32"]
-        print(df.columns)
+        # print(df.columns)
         ############ For debugging only, remove this later ######################
 
-        tensors = []
-        for idx, key in enumerate(["src", "nbr", "label", "embed"]):
-            if key == "src":
-                if isinstance(df[key][0], np.int64):
-                    cur = torch.from_numpy(np.array([df[key][0]])).to(
-                        DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]]
-                    )
-                else:
-                    cur = torch.tensor(
-                        [self.decoding_single(df[key][0])],
-                        dtype=DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]],
-                    )
-            elif key == "label":
-                labels = np.zeros(self.node_num)
-                labels[0] = df[key][0]
-                cur = torch.from_numpy(labels).to(
-                    DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]]
-                )
-                # print("labels", labels)
-            elif key == "nbr":
-                cur = torch.tensor(
-                    self.decoding_neighbors(df[key][0]),
-                    dtype=DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]],
-                )
-            elif key == "embed":
-                feats = self.decoding_features(df[key][0])
-                feat_dtype = DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]]
-                feat_tensors = [
-                    torch.from_numpy(feat).unsqueeze(0).to(feat_dtype) for feat in feats
-                ]
-                cur = torch.cat(feat_tensors)
-            tensors.append(cur)
-        pyg_data = self.create_input(tensors)
+        for idx, key in enumerate(["src", "edges"]):
+            if key == 'src':
+                src = df[key][0]
+                # src = torch.from_numpy(np.array([df[key][0]])).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]])
+            elif key == 'edges':
+                edges = self.decode_edge(df[key][0])
+                # edges = torch.from_numpy(edges).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[idx]])
+        labels, features, all_node_list = self.get_all_node_feats(edges)
+        # labels, features, all_node_list = self.get_all_node_feats_proxy(edges)
+        labels = labels.to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[2]])
+        features = features.to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[3]])
+        # all_node_list = torch.from_numpy(edges).to(DL_ON_FLINK_TYPE_TO_PYTORCH_TYPE[self.input_types[0]])
+        pyg_data = self.create_input(src, edges, labels, features, all_node_list)
+        pyg_data.nidx = self.nidx
+
+        # print("pyg data", pyg_data.nidx)
         return pyg_data
+        # if self.pyg_data is None:
+        #     self.pyg_data = pyg_data
+        # else:
+        #     print("use the same pyg data")
+        #     pyg_data = self.pyg_data
+        # print("pyg data", pyg_data)
+        # print("pyg data feature", pyg_data.x)
+        # print("pyg data edges", pyg_data.edge_index)
+        # print("pyg data label", pyg_data.y)
+        # print("any fucker?")
+        
+        
