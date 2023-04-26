@@ -31,6 +31,7 @@ public class RocksDBWriter {
         this.nodeDbPath = dbPath + "/nodes.db";
         this.edgeDbPath = dbPath + "/edges.db";
         this.neighborPath = dbPath + "/neighbor.db";
+        this.open();
     }
 
     /**

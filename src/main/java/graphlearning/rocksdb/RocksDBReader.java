@@ -27,6 +27,7 @@ public class RocksDBReader {
     public RocksDBReader(String dbPath) {
         this.nodeDbPath = dbPath + "/nodes.db";
         this.edgeDbPath = dbPath + "/edges.db";
+        this.open();
     }
 
     /**
