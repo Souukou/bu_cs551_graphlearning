@@ -26,6 +26,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def train(context: Context):
     pytorch_context = NewPyTorchContext(context)
+    dataset_path = pytorch_context.get_property("dataset_path")
     os.environ["MASTER_ADDR"] = pytorch_context.get_master_ip()
     os.environ["MASTER_PORT"] = str(pytorch_context.get_master_port())
     dist.init_process_group(
@@ -38,8 +39,9 @@ def train(context: Context):
         print("the save path is", model_save_path)
         writer = SummaryWriter(model_save_path+'_tsb')
     
-    dataset = pytorch_context.get_dataset_from_flink()
+    dataset = pytorch_context.get_dataset_from_flink(dataset_path + "/nodes.db")
     data_loader = PyG_DataLoader(dataset, batch_size=1)
+
 
     reddit_cofig = (301, 256, 41)
     kc_config = (34, 32, 4)

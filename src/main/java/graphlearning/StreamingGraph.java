@@ -46,10 +46,10 @@ public class StreamingGraph {
         env.setParallelism(1);
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         final StreamStatementSet statementSet = tEnv.createStatementSet();
-
-        DataStream<Row> inputStream = new InputStream().getStream(env, propFile);
+        InputStream inputObj = new InputStream();
+        DataStream<Row> inputStream = inputObj.getStream(env, propFile);
         if ("train".equals(mode)) {
-            train(modelPath, epoch, statementSet, inputStream, pyScript);
+            train(modelPath, epoch, statementSet, inputStream, pyScript, inputObj.datasetPath);
         }
     }
 
@@ -58,7 +58,8 @@ public class StreamingGraph {
             Integer epoch,
             StreamStatementSet statementSet,
             DataStream<Row> inputStream,
-            String pyScript)
+            String pyScript,
+            String datasetPath)
             throws InterruptedException, ExecutionException {
         final PyTorchClusterConfig config =
                 PyTorchClusterConfig.newBuilder()
@@ -67,6 +68,7 @@ public class StreamingGraph {
                         .setProperty(
                                 MLConstants.CONFIG_STORAGE_TYPE, MLConstants.STORAGE_LOCAL_FILE)
                         .setProperty("model_save_path", modelPath)
+                        .setProperty("dataset_path", datasetPath)
                         .setProperty("input_types", "INT_64,STRING")
                         .build();
 

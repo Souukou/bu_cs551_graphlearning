@@ -7,7 +7,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.types.Row;
 
-import graphlearning.kafka.KafkaEventDeserializer;
 import graphlearning.kafka.MapEventToEdge;
 import graphlearning.kafka.RateCtrlKafkaEventDeserializer;
 import graphlearning.kafka.protos.Event;
@@ -24,6 +23,12 @@ import java.util.List;
 import java.util.Properties;
 
 class InputStream {
+    public String datasetPath;
+
+    public InputStream() {
+        this.datasetPath = "";
+    }
+
     DataStream<Row> getStream(StreamExecutionEnvironment env, String propFile) {
         Properties properties = new Properties();
         try {
@@ -38,6 +43,7 @@ class InputStream {
         long maxRatePerSecond =
                 Long.parseLong(properties.getProperty("ratecontrol.maxRatePerSecond"));
         String datasetPath = properties.getProperty("dataset.path");
+        this.datasetPath = datasetPath;
 
         RateCtrlKafkaEventDeserializer rateCtrlSchema =
                 new RateCtrlKafkaEventDeserializer(maxRatePerSecond);
