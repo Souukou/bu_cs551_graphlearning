@@ -25,8 +25,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def train(context: Context):
-    # print("Testing")
-    # pytorch_context = PyTorchContext(context)
     pytorch_context = NewPyTorchContext(context)
     os.environ["MASTER_ADDR"] = pytorch_context.get_master_ip()
     os.environ["MASTER_PORT"] = str(pytorch_context.get_master_port())
@@ -35,24 +33,21 @@ def train(context: Context):
         world_size=pytorch_context.get_world_size(),
         rank=pytorch_context.get_rank(),
     )
-    # modify this later!!! use the PyG_DataLoader
     if pytorch_context.get_rank() == 0:
         model_save_path = pytorch_context.get_property("model_save_path")
         print("the save path is", model_save_path)
         writer = SummaryWriter(model_save_path+'_tsb')
     
     dataset = pytorch_context.get_dataset_from_flink()
-    data_loader = PyG_DataLoader(dataset, batch_size=1)
+    data_loader = PyG_DataLoader(dataset, batch_size=4)
 
     reddit_cofig = (301, 256, 41)
     kc_config = (34, 32, 4)
     config_tp = kc_config
-    # model = DDP(GS_model(*config_tp, 2))
     gs_model = GS_model(*config_tp, 2)
     ptm_path = '/opt/src/main/python/python_only_test/dataset/pretrianed_graph_sage.pth'
     ptm_dict = torch.load(ptm_path,map_location=torch.device('cpu'))
     gs_model.load_state_dict(ptm_dict)
-    # model = gs_model
     model = DDP(gs_model)
     model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
@@ -64,7 +59,7 @@ def train(context: Context):
     
     for batch_idx, data in enumerate(data_loader):
         
-        loss, acc = utils.val_step(model, data, device = device)
+        loss = utils.train_step(model, optimizer, data, device = device)
         if pytorch_context.get_rank() == 0:
             writer.add_scalar('training/loss', loss, batch_idx)
         
@@ -82,7 +77,7 @@ def train(context: Context):
                 logger.info("the save path is" + model_save_path)
                 os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
                 torch.save(model.module.cpu().state_dict(), model_save_path+'.pth')
-                # modelio.savemodel(model.module.cpu().state_dict(), model_save_path)
+                
                 if batch_idx >= tsb_limit:
                     writer.close()
                 

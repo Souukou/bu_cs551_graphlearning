@@ -10,12 +10,8 @@ def train_step(model, optimizer, batch, device = 'cpu'):
     train_mask = sum(batch.train_mask,[])
     y = batch.y[train_mask][:,0]
     out = model(batch.x, batch.edge_index.to(device))[train_mask]
-    # out = model(new_data.x, new_data.edge_index, new_data.batch)
-    # print(out, y)
-    # print(out.shape, y.shape)
     loss = F.cross_entropy(out, y)
     loss.backward()
-    # loss_ls.append(loss.item())
     optimizer.step()
     return loss.item()
 
@@ -41,11 +37,3 @@ def infer_step(model, batch, device = 'cpu'):
         output = out.data.cpu().numpy().argmax(axis=1)
 
     return output
-
-# def infer_step(model, data_step):
-#     new_data = data_step
-#     model.eval()
-#     out = model(new_data)
-#     # out = model(new_data.x, new_data.edge_index, new_data.batch)
-
-#     return out[data_step.test_mask]
