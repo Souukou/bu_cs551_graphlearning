@@ -24,10 +24,10 @@ import java.util.List;
 import java.util.Properties;
 
 class InputStream {
-    DataStream<Row> getStream(StreamExecutionEnvironment env) {
+    DataStream<Row> getStream(StreamExecutionEnvironment env, String propFile) {
         Properties properties = new Properties();
         try {
-            properties.load(new FileInputStream("prop.config"));
+            properties.load(new FileInputStream(propFile));
         } catch (IOException ex) {
             System.out.println("Error Reading Properties");
         }
