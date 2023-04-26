@@ -8,8 +8,8 @@ from dl_on_flink_pytorch.pytorch_context import PyTorchContext
 from pyflink.common import Row
 from torch import nn
 from torch.nn.parallel import DistributedDataParallel as DDP
-from torch.optim import SGD
-from torch.utils.data import DataLoader
+# from torch.optim import SGD
+# from torch.utils.data import DataLoader
 from torch_geometric.data import Data as PyG_Data
 from torch_geometric.loader import DataLoader as PyG_DataLoader
 from tensorboardX import SummaryWriter
@@ -38,8 +38,10 @@ def train(context: Context):
     # modify this later!!! use the PyG_DataLoader
     if pytorch_context.get_rank() == 0:
         model_save_path = pytorch_context.get_property("model_save_path")
-        print("the save path is", model_save_path)
-        writer = SummaryWriter(model_save_path+'_tsb')
+        # model_save_path = '/tmp/linear/1682475468379'
+    #     print("the save path is", model_save_path)
+        tsb_limit = 90
+        writer = SummaryWriter(model_save_path+'_tsb_valid')
     
     dataset = pytorch_context.get_dataset_from_flink()
     data_loader = PyG_DataLoader(dataset, batch_size=1)
@@ -48,25 +50,30 @@ def train(context: Context):
     kc_config = (34, 32, 4)
     config_tp = kc_config
     # model = DDP(GS_model(*config_tp, 2))
+
+    model_save_path = pytorch_context.get_property("model_save_path")
+    # model_save_path = '/tmp/linear/1682475468379'
+
     gs_model = GS_model(*config_tp, 2)
-    ptm_path = '/opt/src/main/python/python_only_test/dataset/pretrianed_graph_sage.pth'
+    ptm_path = model_save_path + '.pth'
     ptm_dict = torch.load(ptm_path,map_location=torch.device('cpu'))
     gs_model.load_state_dict(ptm_dict)
-    # model = gs_model
-    model = DDP(gs_model)
+    model = gs_model
+    # model = DDP(gs_model)
     model = model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
+    # optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
 
     # where to get the epoch?
     current_epoch = 9999
     logger.info(f"Epoch: {current_epoch}")
-    tsb_limit = 90
+    
     
     for batch_idx, data in enumerate(data_loader):
         
         loss, acc = utils.val_step(model, data, device = device)
         if pytorch_context.get_rank() == 0:
-            writer.add_scalar('training/loss', loss, batch_idx)
+            writer.add_scalar('validation/loss', loss, batch_idx)
+            writer.add_scalar('validation/acc', acc, batch_idx)
         
         logger.info(
                 f"batch: {batch_idx} "
@@ -78,11 +85,12 @@ def train(context: Context):
                 f"loss: {loss:>7f}"
             )
             if pytorch_context.get_rank() == 0:
-                model_save_path = pytorch_context.get_property("model_save_path")
-                logger.info("the save path is" + model_save_path)
-                os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
-                torch.save(model.module.cpu().state_dict(), model_save_path+'.pth')
-                # modelio.savemodel(model.module.cpu().state_dict(), model_save_path)
                 if batch_idx >= tsb_limit:
                     writer.close()
+            #     model_save_path = pytorch_context.get_property("model_save_path")
+            #     logger.info("the save path is" + model_save_path)
+            #     os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
+            #     torch.save(model.module.cpu().state_dict(), model_save_path+'.pth')
+                # modelio.savemodel(model.module.cpu().state_dict(), model_save_path)
+                
                 

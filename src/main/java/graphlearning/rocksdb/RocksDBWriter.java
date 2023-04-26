@@ -1,7 +1,6 @@
 package graphlearning.rocksdb;
 
 import org.rocksdb.ComparatorOptions;
-import org.rocksdb.FlushOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -75,9 +74,10 @@ public class RocksDBWriter {
             createDirIfNotExists(nodeDbPath);
             createDirIfNotExists(edgeDbPath);
             createDirIfNotExists(neighborPath);
+            RocksDB.loadLibrary();
             Options options = new Options();
             options.setCreateIfMissing(true);
-            nodeDb = RocksDB.open(options, nodeDbPath);
+            // nodeDb = RocksDB.open(options, nodeDbPath);
             neighborDb = RocksDB.open(options, neighborPath);
 
             Options options2 = new Options();
@@ -127,13 +127,14 @@ public class RocksDBWriter {
      * @param feature query node's embedding bytes
      */
     public void insertNode(Integer nodeId, byte[] feature) {
-        try {
-            byte[] keyByte = Integer.toString(nodeId).getBytes();
-            byte[] valueByte = feature;
-            nodeDb.put(keyByte, valueByte);
-        } catch (RocksDBException e) {
-            e.printStackTrace();
-        }
+        return;
+        //        try {
+        //            byte[] keyByte = Integer.toString(nodeId).getBytes();
+        //            byte[] valueByte = feature;
+        //            nodeDb.put(keyByte, valueByte);
+        //        } catch (RocksDBException e) {
+        //            e.printStackTrace();
+        //        }
     }
 
     /**
@@ -170,19 +171,19 @@ public class RocksDBWriter {
     }
 
     public void flushNode() {
-        try {
-            FlushOptions flushOptions = new FlushOptions();
-            flushOptions.setWaitForFlush(true);
-            // flush then return
-            nodeDb.flush(flushOptions);
-        } catch (RocksDBException e) {
-            e.printStackTrace();
-            System.out.println("flush node db failed");
-        }
+        //        try {
+        //            FlushOptions flushOptions = new FlushOptions();
+        //            flushOptions.setWaitForFlush(true);
+        //            // flush then return
+        //            nodeDb.flush(flushOptions);
+        //        } catch (RocksDBException e) {
+        //            e.printStackTrace();
+        //            System.out.println("flush node db failed");
+        //        }
     }
 
     public void finalize() {
-        nodeDb.close();
+        // nodeDb.close();
         edgeDb.close();
         neighborDb.close();
     }
