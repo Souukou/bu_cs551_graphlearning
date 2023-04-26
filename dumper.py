@@ -199,7 +199,7 @@ def main(
     assert pretrained_graph_path.exists()
     print("Loading Data")
     pretrained_graph = np.load(str(pretrained_graph_path), allow_pickle=True)[()]
-    dataset = torch_geometric.datasets.KarateClub()[0]
+    dataset = torch_geometric.datasets.Planetoid("/tmp/pubmed", "PubMed", split ='full')[0]
 
     print("Converting data to primitives for faster access...", end=" ")
     pt_edges = set(zip(*pretrained_graph["pt_edges"]))
