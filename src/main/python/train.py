@@ -43,7 +43,8 @@ def train(context: Context):
 
     reddit_cofig = (301, 256, 41)
     kc_config = (34, 32, 4)
-    config_tp = kc_config
+    pub_med_config = (500, 256, 3)
+    config_tp = pub_med_config
     gs_model = GS_model(*config_tp, 2)
     ptm_path = '/opt/src/main/python/python_only_test/dataset/pretrianed_graph_sage.pth'
     ptm_dict = torch.load(ptm_path,map_location=torch.device('cpu'))
