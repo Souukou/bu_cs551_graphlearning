@@ -37,3 +37,22 @@ def infer_step(model, batch, device = 'cpu'):
         output = out.data.cpu().numpy().argmax(axis=1)
 
     return output
+
+@torch.no_grad()
+def online_test(model, test_loader, device):
+    model.eval()
+
+    total_correct = total_examples = 0
+    for batch in test_loader:
+        batch.to(device)
+        
+        y = batch.y[:batch.batch_size]
+        y_hat = model(batch.x, batch.edge_index.to(device))[:batch.batch_size]
+        # print(y)
+
+        total_correct += int((y_hat.argmax(dim=-1) == y).sum())
+        total_examples += batch.batch_size
+        # pbar.update(batch.batch_size)
+    
+
+    return total_correct / total_examples
