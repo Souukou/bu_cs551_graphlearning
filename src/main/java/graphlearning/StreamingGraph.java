@@ -13,6 +13,9 @@ import org.apache.flink.types.Row;
 
 import org.rocksdb.RocksDBException;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
 /** StreamingGraph. */
@@ -38,6 +41,13 @@ public class StreamingGraph {
         conf.setString("metrics.latency.interval", "3000");
         conf.setString("metrics.latency.granularity", "operator");
 
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream(propFile));
+        } catch (IOException ex) {
+            System.out.println("Error Reading Properties");
+        }
+
         if (pyScript.length() == 0) {
             throw new RuntimeException(String.format("%s value not specified", pyScript));
         }
@@ -46,10 +56,16 @@ public class StreamingGraph {
         env.setParallelism(1);
         StreamTableEnvironment tEnv = StreamTableEnvironment.create(env);
         final StreamStatementSet statementSet = tEnv.createStatementSet();
-
-        DataStream<Row> inputStream = new InputStream().getStream(env, propFile);
+        InputStream inputObj = new InputStream();
+        DataStream<Row> inputStream = inputObj.getStream(env, propFile);
         if ("train".equals(mode)) {
-            train(modelPath, epoch, statementSet, inputStream, pyScript);
+            train(
+                    modelPath,
+                    epoch,
+                    statementSet,
+                    inputStream,
+                    pyScript,
+                    properties.getProperty("dataset.path"));
         }
     }
 
@@ -58,7 +74,8 @@ public class StreamingGraph {
             Integer epoch,
             StreamStatementSet statementSet,
             DataStream<Row> inputStream,
-            String pyScript)
+            String pyScript,
+            String datasetPath)
             throws InterruptedException, ExecutionException {
         final PyTorchClusterConfig config =
                 PyTorchClusterConfig.newBuilder()
@@ -67,6 +84,7 @@ public class StreamingGraph {
                         .setProperty(
                                 MLConstants.CONFIG_STORAGE_TYPE, MLConstants.STORAGE_LOCAL_FILE)
                         .setProperty("model_save_path", modelPath)
+                        .setProperty("dataset_path", datasetPath)
                         .setProperty("input_types", "INT_64,STRING")
                         .build();
 

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Properties;
 
 class InputStream {
+
     DataStream<Row> getStream(StreamExecutionEnvironment env, String propFile) {
         Properties properties = new Properties();
         try {
