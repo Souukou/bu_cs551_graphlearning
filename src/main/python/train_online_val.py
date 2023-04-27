@@ -45,7 +45,7 @@ def train(context: Context):
     dataset = pytorch_context.get_dataset_from_flink()
     data_loader = PyG_DataLoader(dataset, batch_size=1)
 
-    path = '/tmp/pubmed'
+    path = '/opt/data/tmp/pubmed'
     # dataset = CoraFull(path)
     dataset = Planetoid(path, "PubMed", split ='full')
     data_all = dataset[0]

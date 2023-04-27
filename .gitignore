@@ -213,7 +213,6 @@ flink-*
 
 dataset-ut
 
-protobuf
-
 apache-maven-*
 
+data/tmp
