@@ -65,7 +65,7 @@ def train(context: Context):
     # where to get the epoch?
     current_epoch = 9999
     logger.info(f"Epoch: {current_epoch}")
-    tsb_limit = 90
+    tsb_limit = 10000
     
     for batch_idx, data in enumerate(data_loader):
         
@@ -74,7 +74,7 @@ def train(context: Context):
         if pytorch_context.get_rank() == 0:
             writer.add_scalar('training/loss', loss, batch_idx)
         
-        if (batch_idx + 1) % 20 == 0:
+        if (batch_idx + 1) % 50 == 0:
             test_acc = utils.online_test(model, test_loader, device)
             if pytorch_context.get_rank() == 0:
                 writer.add_scalar('validation/acc', test_acc, batch_idx)
