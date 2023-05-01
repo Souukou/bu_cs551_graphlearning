@@ -60,6 +60,7 @@ public class RocksDBReader {
             nodeDb = RocksDB.openReadOnly(nodeDbPath);
 
             Options options2 = new Options();
+            options2.optimizeForPointLookup(0);
             ComparatorOptions comparatorOptions = new ComparatorOptions();
             options2.setComparator(new OrderByCountComparator(comparatorOptions));
             edgeDb = RocksDB.openReadOnly(options2, edgeDbPath);
