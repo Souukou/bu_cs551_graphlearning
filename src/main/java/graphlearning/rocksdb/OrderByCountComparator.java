@@ -29,11 +29,10 @@ public class OrderByCountComparator extends AbstractComparator {
         int bId = Integer.parseInt(bStrs[0]);
         int aCount = Integer.parseInt(aStrs[1]);
         int bCount = Integer.parseInt(bStrs[1]);
-
-        if (aCount == bCount) {
-            return aId - bId;
-        } else {
+        if (aId == bId) {
             return aCount - bCount;
+        } else {
+            return aId - bId;
         }
     }
 }

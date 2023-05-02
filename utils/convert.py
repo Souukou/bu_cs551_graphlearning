@@ -18,7 +18,7 @@ def main(argv):
 
     for i in tqdm.tqdm(range(len(dictionary["pt_mask"]))):
         if dictionary["pt_mask"][i]:
-            dictionary["pt_nodes"].append(i)
+            dictionary["ptNodes"].append(i)
 
     del dictionary["pt_mask"], dictionary["pt_edges"]
 

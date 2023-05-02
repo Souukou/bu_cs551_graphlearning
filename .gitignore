@@ -216,3 +216,5 @@ dataset-ut
 apache-maven-*
 
 data/tmp
+
+pretrain_dict.pubmed.npy

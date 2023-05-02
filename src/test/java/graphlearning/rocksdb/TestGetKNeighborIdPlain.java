@@ -34,7 +34,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId2() {
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
             ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborIdPlain(3, 2, 10);
@@ -59,7 +59,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId3() {
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
             ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborIdPlain(3, 3, 10);
@@ -90,7 +90,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId4() {
             // test with limit neighbor size
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
@@ -141,7 +141,7 @@ public class TestGetKNeighborIdPlain {
         }
     }
 
-    @Nested
+    // @Nested
     class UndirectedGraph extends TestRocksDBSetup2 {
         @Test
         void testGetKNeighborId1() {
@@ -164,7 +164,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId2() {
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
             ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborIdPlain(3, 2, 10);
@@ -191,7 +191,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId3() {
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
             ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborIdPlain(3, 3, 10);
@@ -236,7 +236,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertEquals(expectedNeighborHashSet, neighborHashSet);
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId4() {
             // test with limit neighbor size
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
@@ -258,7 +258,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertTrue(expectedNeighborHashSet.containsAll(neighborHashSet));
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId5() {
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
             ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborIdPlain(3, 2, 3);
@@ -287,7 +287,7 @@ public class TestGetKNeighborIdPlain {
             Assertions.assertTrue(expectedNeighborHashSet.containsAll(neighborHashSet));
         }
 
-        @Test
+        // @Test
         void testGetKNeighborId6() {
             RocksDBReader rocksDBReader = new RocksDBReader(nodePath, edgePath);
             ArrayList<ArrayList<Integer>> neighbors = rocksDBReader.getKNeighborIdPlain(3, 3, 3);

@@ -3,6 +3,8 @@ package graphlearning.rocksdb;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.rocksdb.ComparatorOptions;
+import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
 
@@ -17,7 +19,10 @@ public class TestStaticNeighborReader {
 
         @Test
         void testFindNeighbor1() {
-            try (RocksDB db = RocksDB.openReadOnly(edgePath)) {
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            Options options2 = new Options();
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
                 ArrayList<Integer> neighbors = NeighborReader.findNeighbor(21, db, -1);
                 Assertions.assertEquals(
                         new HashSet<>(Arrays.asList(31, 33, 35, 37, 39)), new HashSet<>(neighbors));
@@ -35,7 +40,10 @@ public class TestStaticNeighborReader {
 
         @Test
         void testFindNeighborReservoir1() {
-            try (RocksDB db = RocksDB.openReadOnly(edgePath)) {
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            Options options2 = new Options();
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
                 ArrayList<Integer> neighbors = NeighborReader.findNeighbor(21, db, -1);
                 Assertions.assertEquals(
                         new HashSet<>(Arrays.asList(31, 33, 35, 37, 39)), new HashSet<>(neighbors));
@@ -53,7 +61,10 @@ public class TestStaticNeighborReader {
 
         @Test
         void testFindNeighborAndNeighborReservoir1() {
-            try (RocksDB db = RocksDB.openReadOnly(edgePath)) {
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            Options options2 = new Options();
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
                 for (int i = 1; i < 50; i++) {
                     ArrayList<Integer> neighbors = NeighborReader.findNeighbor(i, db, 1000);
                     ArrayList<Integer> neighbors2 =
@@ -72,7 +83,10 @@ public class TestStaticNeighborReader {
     class UndirectedGraph extends TestRocksDBSetup2 {
         @Test
         void testFindNeighbor1() {
-            try (RocksDB db = RocksDB.openReadOnly(edgePath)) {
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            Options options2 = new Options();
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
                 ArrayList<Integer> neighbors = NeighborReader.findNeighbor(21, db, -1);
                 Assertions.assertEquals(
                         new HashSet<>(Arrays.asList(11, 9, 7, 5, 3, 31, 33, 35, 37, 39)),
@@ -92,7 +106,10 @@ public class TestStaticNeighborReader {
 
         @Test
         void testFindNeighborReservoir1() {
-            try (RocksDB db = RocksDB.openReadOnly(edgePath)) {
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            Options options2 = new Options();
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
                 ArrayList<Integer> neighbors = NeighborReader.findNeighbor(21, db, -1);
                 Assertions.assertEquals(
                         new HashSet<>(Arrays.asList(11, 9, 7, 5, 3, 31, 33, 35, 37, 39)),
@@ -112,7 +129,10 @@ public class TestStaticNeighborReader {
 
         @Test
         void testFindNeighborAndNeighborReservoir1() {
-            try (RocksDB db = RocksDB.openReadOnly(edgePath)) {
+            ComparatorOptions comparatorOptions = new ComparatorOptions();
+            Options options2 = new Options();
+            options2.setComparator(new OrderByCountComparator(comparatorOptions));
+            try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
                 for (int i = 1; i < 20; i++) {
                     ArrayList<Integer> neighbors = NeighborReader.findNeighbor(i, db, 1000);
                     ArrayList<Integer> neighbors2 =
