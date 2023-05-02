@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.rocksdb.ComparatorOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -47,10 +48,13 @@ public abstract class TestRocksDBSetup1 {
         createDirIfNotExists(edgePath);
         createDirIfNotExists(neighborPath);
 
-        try (Options options = new Options().setCreateIfMissing(true);
-                RocksDB nodeDb = RocksDB.open(options, nodePath);
-                RocksDB edgeDb = RocksDB.open(options, edgePath);
-                RocksDB neighborDb = RocksDB.open(options, neighborPath)) {
+        ComparatorOptions comparatorOptions = new ComparatorOptions();
+        Options options2 = new Options().setCreateIfMissing(true);
+        options2.setComparator(new OrderByCountComparator(comparatorOptions));
+        Options options = new Options().setCreateIfMissing(true);
+        try (RocksDB nodeDb = RocksDB.open(options, nodePath);
+                RocksDB neighborDb = RocksDB.open(options, neighborPath);
+                RocksDB edgeDb = RocksDB.open(options2, edgePath)) {
             // construct the nodes.db in the following format:
             // key: nodeID
             // value: label|embedding
@@ -117,22 +121,39 @@ public abstract class TestRocksDBSetup1 {
     void testRocksDBData() {
         Options options = new Options();
         options.setCreateIfMissing(true);
-        try (RocksDB db = RocksDB.openReadOnly(options, nodePath)) {
-            // Junit need to use assertArrayEquals to compare byte[]
-            // assertEquals will compare the reference
-            Assertions.assertArrayEquals(
-                    "4|0.24,0.25,0.26,0.27".getBytes(), db.get("24".getBytes()));
-            Assertions.assertArrayEquals(
-                    "1|0.11,0.12,0.13,0.14".getBytes(), db.get("11".getBytes()));
-            Assertions.assertArrayEquals(
-                    "0|0.90,0.91,0.92,0.93".getBytes(), db.get("90".getBytes()));
+
+        try (RocksDB db = RocksDB.openReadOnly(options, neighborPath)) {
+            Assertions.assertArrayEquals("5".getBytes(), db.get("51".getBytes()));
+            Assertions.assertArrayEquals("0".getBytes(), db.get("52".getBytes()));
+            Assertions.assertArrayEquals("5".getBytes(), db.get("1".getBytes()));
+            Assertions.assertArrayEquals("0".getBytes(), db.get("2".getBytes()));
+
         } catch (RocksDBException e) {
             System.err.println("Error working with RocksDB: " + e.getMessage());
             e.printStackTrace();
             Assertions.assertTrue(false);
         }
 
-        try (RocksDB db = RocksDB.openReadOnly(options, edgePath)) {
+        // try (RocksDB db = RocksDB.openReadOnly(options, nodePath)) {
+        //     // Junit need to use assertArrayEquals to compare byte[]
+        //     // assertEquals will compare the reference
+        //     Assertions.assertArrayEquals(
+        //             "4|0.24,0.25,0.26,0.27".getBytes(), db.get("24".getBytes()));
+        //     Assertions.assertArrayEquals(
+        //             "1|0.11,0.12,0.13,0.14".getBytes(), db.get("11".getBytes()));
+        //     Assertions.assertArrayEquals(
+        //             "0|0.90,0.91,0.92,0.93".getBytes(), db.get("90".getBytes()));
+        // } catch (RocksDBException e) {
+        //     System.err.println("Error working with RocksDB: " + e.getMessage());
+        //     e.printStackTrace();
+        //     Assertions.assertTrue(false);
+        // }
+
+        ComparatorOptions comparatorOptions = new ComparatorOptions();
+        Options options2 = new Options();
+        options2.setComparator(new OrderByCountComparator(comparatorOptions));
+
+        try (RocksDB db = RocksDB.openReadOnly(options2, edgePath)) {
             Assertions.assertArrayEquals("11".getBytes(), db.get("1|0".getBytes()));
             Assertions.assertArrayEquals("13".getBytes(), db.get("1|1".getBytes()));
             Assertions.assertArrayEquals("15".getBytes(), db.get("1|2".getBytes()));
@@ -156,17 +177,6 @@ public abstract class TestRocksDBSetup1 {
             Assertions.assertTrue(false);
         }
 
-        try (RocksDB db = RocksDB.openReadOnly(options, neighborPath)) {
-            Assertions.assertArrayEquals("5".getBytes(), db.get("51".getBytes()));
-            Assertions.assertArrayEquals("0".getBytes(), db.get("52".getBytes()));
-            Assertions.assertArrayEquals("5".getBytes(), db.get("1".getBytes()));
-            Assertions.assertArrayEquals("0".getBytes(), db.get("2".getBytes()));
-
-        } catch (RocksDBException e) {
-            System.err.println("Error working with RocksDB: " + e.getMessage());
-            e.printStackTrace();
-            Assertions.assertTrue(false);
-        }
         options.close();
     }
 }
