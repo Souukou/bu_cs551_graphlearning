@@ -218,3 +218,7 @@ apache-maven-*
 data
 
 startup.py
+
+*_tsb
+
+res.txt
