@@ -35,7 +35,7 @@ docker exec -it host /bin/bash
 In the docker, run the command
 
 ```bash
-/opt/run.sh <path_to_pretrain_dict.npy> <path_to_pretrained_model.pth>
+/opt/run.sh <path_to_pretrain_dict.npy> <path_to_pretrained_model>
 ```
 
 To use the pretrained file we provide, use
