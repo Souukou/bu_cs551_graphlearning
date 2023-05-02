@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [[ -z $1 ]] || [[ -z $2 ]] then;
-  echo "requires path to pretrain_dict.npy. Usage: $0 <w.r.t. project_root>/relative/path/to/pretrain_dict.npy <w.r.t project_root>/relative/path/to/trained_model_graphsage.pth"
+if [[ -z $1 ]] || [[ -z $2 ]]; then
+  echo "Requires path to pretrain_dict.npy. Usage: $0 <w.r.t. project_root>/relative/path/to/pretrain_dict.npy <w.r.t project_root>/relative/path/to/trained_model_graphsage.pth"
   exit 1
 fi
 

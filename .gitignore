@@ -215,6 +215,8 @@ dataset-ut
 
 apache-maven-*
 
-data/tmp
+data
 
 pretrain_dict.pubmed.npy
+
+startup.py
