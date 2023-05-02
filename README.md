@@ -2,42 +2,48 @@
 
 **Design Document:** [Here](DESIGN.md)
 
-**Reddit Dataset
-**: [Download Here](https://uoe-my.sharepoint.com/:u:/g/personal/s2121589_ed_ac_uk/Ee9Ye2ousIpKtCPIrMd9CIUB1fawjUYVq8XUTJJocerlXA?e=UebzlG)
+***REMOVED***
 
 ## Setup
-
-Install Miniconda [Download Here](https://docs.conda.io/en/latest/miniconda.html).
-
---------------
-**If you are on M1 Mac**
+Install Docker [docker.io](docker.io). To train on GPU, download NVIDIA docker [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
 
 ```bash
-CONDA_SUBDIR=osx-64 conda create -n streaming python=3.8
-conda config --env --set subdir osx-64
+git clone https://cs551-gitlab.bu.edu/cs551/spring23/group-2/team-2.git
+chmod 777 team-2 team-2/protobuf
+cd team-2
+```
+#### Launching Host
+Run the docker with name `host`. If you already have a docker in the same name, remove it or change the following docker name to yours.
+
+Train on CPU
+```bash
+docker run -d --name host -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
+```
+For NVIDIA runtime:
+```bash
+docker run -d --name=host --runtime=nvidia -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
 ```
 
---------------
+#### Running Code
+
+Enter the docker
 
 ```bash
-conda create -n streaming python=3.8
-conda install tensorflow -c tensorflow
-conda install pytorch -c pytorch
-conda install "dgl<0.8" -c dglteam
-pip3 install seaborn pandas
-pip3 install -r requirements.txt
+docker exec -it host /bin/bash
 ```
 
-## Running
-
-### Build and run with prebuild environment
+In the docker, run the command
 
 ```bash
-git clone https:://cs551-gitlab.bu.edu/cs551/spring23/group-2/team-2.git
-cd team-2/
-docker run -v $PWD:/opt -p 8081:8081 -it captain0pool/streaming:latest /opt/run.sh
-````
+/opt/run.sh <path_to_pretrain_dict.npy> <path_to_pretrained_model>
+```
 
-### Build and run manually
+To use the pretrained file we provide, use
 
-WIP
+```bash
+/opt/run.sh pretrain_dict.pubmed.npy pretrained_graph_sage.pth
+
+```
+
+
+After running the command, you can go to localhost:8081 and check the stdout of the task manager. Ignore the UnsupportedOperationException in the trace information, as it is a problem related to RocksDB. You will then be able to view the losses of the training.

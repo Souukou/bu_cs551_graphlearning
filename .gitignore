@@ -213,9 +213,12 @@ flink-*
 
 dataset-ut
 
-protobuf
-
 apache-maven-*
 
-pretrain_dict.pubmed.npy
+data
 
+startup.py
+
+*_tsb
+
+res.txt

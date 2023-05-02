@@ -69,7 +69,7 @@ class InputStream {
                 windowed.map(
                                 new Sampler(
                                         maxTrainingSamples,
-                                        "/opt/src/main/java/graphlearning/sampling/pretrained_nodes.json",
+                                        "/opt/data/pretrained_nodes.json",
                                         datasetPath))
                         .name("MapSampler")
                         .disableChaining();

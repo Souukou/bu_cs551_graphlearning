@@ -35,15 +35,17 @@ def train(context: Context):
         world_size=pytorch_context.get_world_size(),
         rank=pytorch_context.get_rank(),
     )
+
+    model_save_path = pytorch_context.get_property("model_save_path")
+    print("the save path is:", model_save_path)
+
     if pytorch_context.get_rank() == 0:
-        model_save_path = pytorch_context.get_property("model_save_path")
-        print("the save path is", model_save_path)
         writer = SummaryWriter(model_save_path+'_tsb')
     
     dataset = pytorch_context.get_dataset_from_flink()
     data_loader = PyG_DataLoader(dataset, batch_size=1)
 
-    path = '/tmp'
+    path = '/opt/data/tmp/pubmed'
     # dataset = CoraFull(path)
     dataset = Planetoid(path, "PubMed", split ='full')
     data_all = dataset[0]
@@ -55,7 +57,7 @@ def train(context: Context):
     pub_med_config = (500, 256, 3)
     config_tp = pub_med_config
     gs_model = GS_model(*config_tp, 2)
-    ptm_path = '/opt/src/main/python/python_only_test/dataset/pretrianed_graph_sage.pth'
+    ptm_path = model_save_path + '.pth'
     ptm_dict = torch.load(ptm_path,map_location=torch.device('cpu'))
     gs_model.load_state_dict(ptm_dict)
     model = DDP(gs_model)
@@ -90,7 +92,6 @@ def train(context: Context):
                 f"loss: {loss:>7f}"
             )
             if pytorch_context.get_rank() == 0:
-                model_save_path = pytorch_context.get_property("model_save_path")
                 logger.info("the save path is" + model_save_path)
                 os.makedirs(os.path.dirname(model_save_path), exist_ok=True)
                 torch.save(model.module.cpu().state_dict(), model_save_path+'.pth')
