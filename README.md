@@ -16,11 +16,11 @@ cd team-2
 #### Launching Host
 Train on CPU
 ```bash
-docker run -d -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 $captain0pool/streaming:deploy
+docker run -d -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
 ```
 For NVIDIA runtime:
 ```bash
-docker run -d --name=host --runtime=nvidia -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 $captain0pool/streaming:deploy
+docker run -d --name=host --runtime=nvidia -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
 ```
 
 #### Running Code
