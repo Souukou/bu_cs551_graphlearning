@@ -13,6 +13,8 @@ chmod 777 team-2 team-2/protobuf
 cd team-2
 ```
 #### Launching Host
+Run the docker with name `host`. If you already have a docker in the same name, remove it or change the following docker name to yours.
+
 Train on CPU
 ```bash
 docker run -d --name host -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
@@ -23,14 +25,23 @@ docker run -d --name=host --runtime=nvidia -v $PWD:/opt -p 6006:6006 -p 8081:808
 ```
 
 #### Running Code
+
+Enter the docker
+
 ```bash
-docker exec -it host /opt/run.sh <path_to_pretrain_dict.npy> <path_to_pretrained_model.pth>
+docker exec -it host /bin/bash
+```
+
+In the docker, run the command
+
+```bash
+/opt/run.sh <path_to_pretrain_dict.npy> <path_to_pretrained_model.pth>
 ```
 
 To use the pretrained file we provide, use
 
 ```bash
-docker exec -it host /opt/run.sh pretrain_dict.pubmed.npy pretrained_graph_sage.pth
+/opt/run.sh pretrain_dict.pubmed.npy pretrained_graph_sage.pth
 
 ```
 
