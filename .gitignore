@@ -217,3 +217,5 @@ protobuf
 
 apache-maven-*
 
+pretrain_dict.pubmed.npy
+

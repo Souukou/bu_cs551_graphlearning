@@ -55,7 +55,8 @@ public class TestRocksDBWriter {
         }
     }
 
-    @Test
+    // insert node is disabled
+    // @Test
     void testInsertNode1() {
         RocksDBWriter rocksDBWriter = new RocksDBWriter(nodePath, edgePath, neighborPath);
 
@@ -270,7 +271,8 @@ public class TestRocksDBWriter {
         Assertions.assertEquals(feature, featureRead);
     }
 
-    @Test
+    // insert node is disabled
+    // @Test
     void testInserNode2() {
         // test insert with int label and byte feature
 

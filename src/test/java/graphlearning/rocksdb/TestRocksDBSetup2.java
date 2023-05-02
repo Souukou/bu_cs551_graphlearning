@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.rocksdb.ComparatorOptions;
 import org.rocksdb.Options;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksDBException;
@@ -48,9 +49,13 @@ public abstract class TestRocksDBSetup2 {
 
         createDirIfNotExists(edgePath);
 
+        ComparatorOptions comparatorOptions = new ComparatorOptions();
+        Options options2 = new Options().setCreateIfMissing(true);
+        options2.setComparator(new OrderByCountComparator(comparatorOptions));
+
         try (Options options = new Options().setCreateIfMissing(true);
                 RocksDB nodeDb = RocksDB.open(options, nodePath);
-                RocksDB edgeDb = RocksDB.open(options, edgePath);
+                RocksDB edgeDb = RocksDB.open(options2, edgePath);
                 RocksDB neighborDb = RocksDB.open(options, neighborPath)) {
 
             // construct the edge.db in the following format:
@@ -96,6 +101,8 @@ public abstract class TestRocksDBSetup2 {
     void testRocksDBData() {
         Options options = new Options();
         options.setCreateIfMissing(true);
+        ComparatorOptions comparatorOptions = new ComparatorOptions();
+        options.setComparator(new OrderByCountComparator(comparatorOptions));
 
         try (RocksDB db = RocksDB.open(options, edgePath)) {
             Assertions.assertEquals("11", new String(db.get("1|0".getBytes())));
