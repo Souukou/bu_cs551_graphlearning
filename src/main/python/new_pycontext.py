@@ -19,19 +19,20 @@ from typing import Tuple
 
 
 class NewPyTorchContext(PyTorchContext):
-    def get_dataset_from_flink(self, nodeDb = "dataset-test/nodes.db") -> FlinkStreamDataset:
+    def get_dataset_from_flink(self) -> FlinkStreamDataset:
         """
         Get the data loader to read data from Flink.
         """
-        print("getting the node db", nodeDb)
-        return NewFlinkStreamDataset(self, nodeDb)
+        # print("getting the node db", nodeDb)
+        return NewFlinkStreamDataset(self)
 
 class NewFlinkStreamDataset(FlinkStreamDataset):
-    def __init__(self, context: Context, nodeDb = "dataset-test/nodes.db"):
+    def __init__(self, context: Context):
         super(NewFlinkStreamDataset, self).__init__(context)
         opts = rocksdb.Options()
         # print("rocksdb opts", opts)
-        self.node_db = rocksdb.DB(nodeDb, opts, read_only=True)
+        dataset_path = context.get_property("dataset_path") + "/nodes.db"
+        self.node_db = rocksdb.DB(dataset_path, opts, read_only=True)
         self.pyg_data = None
         self.nidx = 0
 

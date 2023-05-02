@@ -39,7 +39,7 @@ def train(context: Context):
         print("the save path is", model_save_path)
         writer = SummaryWriter(model_save_path+'_tsb')
     
-    dataset = pytorch_context.get_dataset_from_flink(dataset_path + "/nodes.db")
+    dataset = pytorch_context.get_dataset_from_flink()
     data_loader = PyG_DataLoader(dataset, batch_size=1)
 
 
