@@ -217,8 +217,4 @@ apache-maven-*
 
 data
 
-pretrain_dict.pubmed.npy
-
 startup.py
-
-pretrained_graph_sage.pth

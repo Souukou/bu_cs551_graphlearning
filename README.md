@@ -2,8 +2,7 @@
 
 **Design Document:** [Here](DESIGN.md)
 
-**Reddit Dataset
-**: [Download Here](https://uoe-my.sharepoint.com/:u:/g/personal/s2121589_ed_ac_uk/Ee9Ye2ousIpKtCPIrMd9CIUB1fawjUYVq8XUTJJocerlXA?e=UebzlG)
+***REMOVED***
 
 ## Setup
 Install Docker [docker.io](docker.io). To train on GPU, download NVIDIA docker [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
@@ -16,14 +15,21 @@ cd team-2
 #### Launching Host
 Train on CPU
 ```bash
-docker run -d -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
+docker run -d -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy --name host
 ```
 For NVIDIA runtime:
 ```bash
-docker run -d --name=host --runtime=nvidia -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy
+docker run -d --name=host --runtime=nvidia -v $PWD:/opt -p 6006:6006 -p 8081:8081 -p 9092:9092 captain0pool/streaming:deploy  --name host
 ```
 
 #### Running Code
+```bash
+docker exec -it host /opt/run.sh <path_to_pretrain_dict.npy> <path_to_pretrained_model.pth>
 ```
-docker exec -it host /opt/run.sh
+
+To use the pretrained file we provide, use
+
+```bash
+docker exec -it host /opt/run.sh pretrain_dict.pubmed.npy pretrained_graph_sage.pth
+
 ```
