@@ -41,7 +41,7 @@ In the docker, run the command
 To use the pretrained file we provide, use
 
 ```bash
-/opt/run.sh pretrain_dict.pubmed.npy pretrained_graph_sage.pth
+/opt/run.sh models/pretrain_dict.pubmed.npy models/pretrained_graph_sage.pth
 
 ```
 
