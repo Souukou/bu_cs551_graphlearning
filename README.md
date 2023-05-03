@@ -47,5 +47,14 @@ To use the pretrained file we provide, use
 
 ```
 
+**Note**
 
-After running the command, you can go to localhost:8081 and check the stdout of the task manager. Ignore the UnsupportedOperationException in the trace information, as it is a problem related to RocksDB. You will then be able to view the losses of the training.
+After running the command, you can go to `localhost:8081` and check the stdout of the task manager. Ignore the `UnsupportedOperationException` in the trace information, as it is a problem related to RocksDB. You will then be able to view the losses of the training. TensorBoard monitoring can be accessed at `localhost:6006`. You may need to wait for a while until it becomes available.
+
+#### Running the Unit Test
+
+The major components are covered by JUnit. You can run the tests with the following command:
+
+```
+mvn test
+```
