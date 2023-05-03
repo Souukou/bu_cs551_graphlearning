@@ -1,10 +1,20 @@
-# GNNs on Larger than Memory Streaming Graphs
+# Online training of streaming Graph Neural Networks
+
+An incredible project created by [Adrish Dey](https://github.com/captain-pool), [Aoming Liu](https://github.com/zxcvfd13502), [Baicheng Fang](https://github.com/bcfang18), [Iasonas Nikolaou](https://github.com/jasonNikolaou), [Yuhang Song](https://github.com/souukou)
+
+Directed by Professor [Vasiliki Kalavri](https://github.com/vasia)
+
+---
+
+**Project Description:** [Here](project_description.pdf)
 
 **Design Document:** [Here](DESIGN.md)
 
-***REMOVED***
-
 **Evaluations** [Here](Evaluations.md)
+
+**Midterm Presentation** [Here](midterm_presentation.pdf)
+
+**Final Presentation** [Here](final_presentation.pdf)
 
 ## Setup
 Install Docker [docker.io](docker.io). To train on GPU, download NVIDIA docker [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
