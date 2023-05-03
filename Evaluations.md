@@ -211,7 +211,7 @@ optimizing the system\'s overall efficiency.
 
 ### 2. Throughput
 
-![img6](images/Throughput vs Sampling Depth.png)
+![img6](images/Throughput vs Reservoir Size.png)
 As the reservoir size increases, the throughput experiences a slight initial increase,
 followed by a period of stabilization and, eventually, a decrease. This
 pattern suggests that while enlarging the reservoir size may initially
@@ -274,7 +274,7 @@ significantly higher latency.
 
 ### 2. Throughput
 
-![img10](images/Throughput vs Reservoir Size.png)
+![img10](images/Throughput vs Sampling Depth.png)
 
 As the sampling depth increases, the system experiences a decrease in
 throughput. This suggests that a higher sampling depth, which involves
