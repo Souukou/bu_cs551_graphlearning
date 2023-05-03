@@ -107,7 +107,7 @@ Computation Graph Depth(Sampling layers): 2
 
 ### 1. Latency
 
-![](media/image9.png){width="6.5in" height="3.25in"}
+![img1](images/Latency vs Input Rate.png){width="6.5in" height="3.25in"}
 
 In general terms, end-to-end latency exhibits a monotonic increase as
 the input rate rises. An interesting observation to consider is that the
@@ -125,7 +125,7 @@ requirements while maintaining optimal performance.
 
 ### 2. Throughput
 
-![](media/image12.png){width="6.5in" height="3.25in"}
+![img2](images/Throughput vs Input Rate.png){width="6.5in" height="3.25in"}
 
 Throughput, measured in graphs per second (graph/sec), indicates the
 number of computation graphs generated per second. These computation
@@ -146,7 +146,7 @@ optimal system performance.
 
 ### 3. Memory Consumption
 
-![](media/image7.png){width="6.5in" height="3.25in"}
+![img3](images/Memory Usage vs Input Rate.png){width="6.5in" height="3.25in"}
 
 The memory consumption associated with running applications of operators
 remains relatively stable, ranging between 12 and 14 units, even as the
@@ -158,7 +158,7 @@ performance of the system under varying conditions.
 
 ### 4. I/O Behavior
 
-![](media/image8.png){width="6.5in" height="3.25in"}
+![img4](images/IO Usage vs Input Rate.png){width="6.5in" height="3.25in"}
 
 The unit KB/tick here means how much KB data is being transferred
 between memory and disk per tick.
@@ -192,7 +192,7 @@ Sampling layers: 2
 
 ### 1. Latency
 
-![](media/image6.png){width="6.5in" height="3.25in"}The graph
+![img5](images/Latency vs Reservoir Size.png){width="6.5in" height="3.25in"}The graph
 illustrates that as the reservoir size increases, latency consistently
 rises. The reservoir size is indicative of the total number of root
 nodes in the partial graph for downstream worker. Consequently, when the
@@ -211,7 +211,7 @@ optimizing the system\'s overall efficiency.
 
 ### 2. Throughput
 
-![](media/image4.png){width="6.5in" height="3.25in"}As the reservoir
+![img6](images/Throughput vs Reservoir Size.png){width="6.5in" height="3.25in"}As the reservoir
 size increases, the throughput experiences a slight initial increase,
 followed by a period of stabilization and, eventually, a decrease. This
 pattern suggests that while enlarging the reservoir size may initially
@@ -224,7 +224,7 @@ data the downstream worker can utilize.
 
 ### 3. Memory Consumption
 
-![](media/image3.png){width="6.5in" height="3.25in"}
+![img7](images/Memory Usage vs Reservoir Size.png){width="6.5in" height="3.25in"}
 
 The memory consumption associated with running applications of operators
 remains relatively stable, even as the reservoir size increases. This
@@ -240,7 +240,7 @@ not strained due to fluctuations in reservoir size.
 
 ### 4. I/O Behavior
 
-![](media/image1.png){width="6.5in" height="3.25in"}
+![img8](images/IO Usage vs Reservoir Size.png){width="6.5in" height="3.25in"}
 
 As the reservoir size increases, I/O usage exhibits a slight upward
 trend. This implies that a larger reservoir size leads to a moderate
@@ -261,7 +261,7 @@ Reservoir Size: 2
 
 ### 1. Latency
 
-![](media/image10.png){width="6.5in" height="3.25in"}As the sampling
+![img9](images/Latency vs Sampling Depth.png){width="6.5in" height="3.25in"}As the sampling
 depth increases, there is a slight increase in end-to-end latency. This
 suggests that a higher sampling depth, which corresponds to a more
 detailed and extensive analysis of data, leads to a marginally longer
@@ -274,7 +274,7 @@ significantly higher latency.
 
 ### 2. Throughput
 
-![](media/image5.png){width="6.5in" height="3.25in"}
+![img10](images/Throughput vs Sampling Depth.png){width="6.5in" height="3.25in"}
 
 As the sampling depth increases, the system experiences a decrease in
 throughput. This suggests that a higher sampling depth, which involves
@@ -285,7 +285,7 @@ performance.
 
 ### 3. Memory Consumption
 
-![](media/image2.png){width="6.5in" height="3.25in"}
+![img11](images/Memory Usage vs Sampling Depth.png){width="6.5in" height="3.25in"}
 
 Memory consumption remains relatively stable at a level of approximately
 12MB, regardless of changes in sampling depth, this is also the case
@@ -293,7 +293,7 @@ when evaluating reservoir size and input rate.
 
 ### 4. I/O Behavior
 
-![](media/image11.png){width="6.5in" height="3.25in"}
+![img12](images/IO Usage vs Sampling Depth.png){width="6.5in" height="3.25in"}
 
 As the sampling depth increases, I/O usage experiences a very subtle
 increase, but overly lies in somewhere between 4000 and 4500. This
