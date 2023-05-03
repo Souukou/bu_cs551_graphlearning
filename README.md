@@ -4,6 +4,8 @@
 
 ***REMOVED***
 
+**Evaluations** [Here](Evaluations.md)
+
 ## Setup
 Install Docker [docker.io](docker.io). To train on GPU, download NVIDIA docker [here](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html).
 
